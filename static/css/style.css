@@ -1,0 +1,100 @@
+/* Body styles for dark mode */
+body {
+    background-color: #121212; /* Dark background color */
+    color: #ffffff; /* Text color */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Vertically center content */
+}
+
+/* Container styles */
+.container {
+    text-align: center;
+    padding: 50px;
+}
+
+/* Header styles */
+h1 {
+    font-size: 36px;
+    color: #FF6D00; /* Violet highlight color */
+    margin-bottom: 20px;
+}
+
+/* Button styles */
+a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #6E2677; /* Dull violet button background color */
+    color: #ffffff; /* Button text color */
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 10px;
+    transition: background-color 0.3s; /* Smooth hover transition */
+}
+
+/* Hover effect for buttons */
+a:hover {
+    background-color: #FF6D00; /* Vibrant violet on hover */
+    color: #ffffff;
+}
+
+/* Dark mode toggle styles (optional) */
+.dark-mode-toggle {
+    text-align: right;
+    margin-top: 10px;
+}
+
+/* Dark mode switch styles (optional) */
+.switch {
+    display: inline-block;
+    position: relative;
+    width: 60px;
+    height: 34px;
+}
+
+/* Dark mode slider styles (optional) */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+}
+
+/* Dark mode round styles (optional) */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+}
+
+/* Dark mode slider hover styles (optional) */
+.slider:hover:before {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode switch checked styles (optional) */
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+/* Dark mode slider position when checked (optional) */
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
