@@ -2,9 +2,68 @@
 <html>
 <head>
     <title>NodeMCU Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        .lightbulb {
+            font-size: 36px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .led-on {
+            background-color: #f1c40f;
+        }
+
+        .led-off {
+            background-color: #ccc;
+        }
+    </style>
 </head>
 <body>
-<h1>Connected</h1>    <!-- Add more buttons as needed -->
-<a href="/turn_on_led">TURN ON LED</a>
+    <h1>NodeMCU Control</h1>
+    <button id="led-button" class="button led-off">
+        <span class="lightbulb">💡</span> LED
+    </button>
+    <div id="confirmation-message"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#led-button').click(function() {
+                $.post('/turn_on_led', function(data) {
+                    if (data.message === 'LED turned on') {
+                        $('#led-button').removeClass('led-off').addClass('led-on');
+                        $('#confirmation-message').text(data.message);
+                    } else {
+                        $('#confirmation-message').text('Failed to turn on LED');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
