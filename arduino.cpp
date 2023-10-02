@@ -1,11 +1,14 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
-const char* ssid = "tama";
+const char* ssid = "test";
 const char* password = "tamatama";
 
 // Create an instance of the server
 ESP8266WebServer server(80);
+
+// Global variable to track the LED state (0 = OFF, 1 = ON)
+int ledState = 0;
 
 void setup() {
     pinMode(D1, OUTPUT); // Set D1 (GPIO 5) as an output
@@ -25,7 +28,7 @@ void setup() {
 
     // Define the routes and corresponding functions
     server.on("/", HTTP_GET, handleRoot);
-    server.on("/turn_on_led", HTTP_GET, turnOnLED);
+    server.on("/turn_on_led", HTTP_GET, toggleLED);
 
     // Start the server
     server.begin();
@@ -41,15 +44,17 @@ void handleRoot() {
     String html = "<html><body>";
     html += "<h1>Control LED</h1>";
     html += "<form method='get' action='/turn_on_led'>";
-    html += "<button>Turn On LED</button>";
+    html += "<button>Toggle LED</button>";
     html += "</form>";
     html += "</body></html>";
-    
+
     server.send(200, "text/html", html);
 }
 
-// Function to handle requests to turn on the LED
-void turnOnLED() {
-    digitalWrite(D1, HIGH); // Turn on the LED
-    server.send(200, "text/plain", "LED turned on");
+// Function to handle requests to toggle the LED
+void toggleLED() {
+    ledState = 1 - ledState; // Toggle the LED state (0 to 1 or 1 to 0)
+
+    digitalWrite(D1, ledState); // Set the LED state
+    server.send(200, "text/plain", ledState ? "LED turned on" : "LED turned off");
 }
