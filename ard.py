@@ -7,6 +7,8 @@ import bcrypt
 import os
 arduino_url = 'http://192.168.43.179/get_led_status'  # Arduino IP
 
+#TES azzuri
+
 # Create a Flask application
 app = Flask(__name__)
 
