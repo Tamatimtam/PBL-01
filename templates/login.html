@@ -71,6 +71,12 @@
         <div class="error-message">
             <!-- Display error message here if login fails -->
         </div>
+
+        <div class="error-message">
+            {% if error %}
+            {{ error }}
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>

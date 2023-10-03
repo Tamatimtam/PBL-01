@@ -5,6 +5,7 @@ import requests
 import json
 import bcrypt
 import os
+arduino_url = 'http://192.168.43.179/get_led_status'  # Arduino IP
 
 # Create a Flask application
 app = Flask(__name__)
@@ -70,7 +71,6 @@ def register():
 
 
 # Define a route for the login page
-# Define a route for the login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -114,7 +114,14 @@ def login():
 def index():
     # Check if the user is logged in
     if 'logged_in' in session:
-        return render_template('index.html')
+        response_status = requests.get(arduino_url)
+
+        if response_status.status_code == 200:
+            led_status = response_status.text
+            return render_template('index.html', led_status=led_status)
+        else:
+            error_message = 'Failed to retrieve LED status'
+            return render_template('index.html', error_message=error_message)
     else:
         return redirect(url_for('login'))  # Redirect to the login page if not logged in
 
@@ -131,16 +138,25 @@ def logout():
 
 
 # Define a route to turn on the LED
+# Modify the Flask route to pass the response_status
 @app.route('/turn_on_led', methods=['POST', 'GET'])
 def turn_on_led():
     # Check if the user is logged in
     if 'logged_in' in session:
         # Send a request to NodeMCU to turn on the LED
-        response = requests.get('http://192.168.43.179/turn_on_led')  # NodeMCU IP
-        response_data = {'message': 'LED turned on'}
-        return json.dumps(response_data)
+        response_led = requests.get('http://192.168.43.179/turn_on_led')  # NodeMCU IP
+
+        # Send a request to Arduino to get the LED status
+        response_status = requests.get(arduino_url)
+
+        if response_led.status_code == 200 and response_status.status_code == 200:
+            return render_template('index.html',)
+        else:
+            error_message = 'Failed to control LED or retrieve LED status'
+            return render_template('index.html', error_message=error_message)
     else:
         return redirect(url_for('login'))  # Redirect to the login page if not logged in
+
 
 
 

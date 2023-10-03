@@ -29,6 +29,7 @@ void setup() {
     // Define the routes and corresponding functions
     server.on("/", HTTP_GET, handleRoot);
     server.on("/turn_on_led", HTTP_GET, toggleLED);
+    server.on("/get_led_status", HTTP_GET, getLEDStatus); // Add this route
 
     // Start the server
     server.begin();
@@ -46,6 +47,7 @@ void handleRoot() {
     html += "<form method='get' action='/turn_on_led'>";
     html += "<button>Toggle LED</button>";
     html += "</form>";
+    html += "<p>LED Status: " + String(ledState ? "ON" : "OFF") + "</p>"; // Display LED status
     html += "</body></html>";
 
     server.send(200, "text/html", html);
@@ -57,4 +59,9 @@ void toggleLED() {
 
     digitalWrite(D1, ledState); // Set the LED state
     server.send(200, "text/plain", ledState ? "LED turned on" : "LED turned off");
+}
+
+// Function to handle requests to get the LED status
+void getLEDStatus() {
+    server.send(200, "text/plain", ledState ? "LED is ON" : "LED is OFF");
 }

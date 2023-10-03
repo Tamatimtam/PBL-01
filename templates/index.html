@@ -46,29 +46,42 @@
 <body>
     <h1>NodeMCU Control</h1>
     <button id="led-button" class="button led-off">
-        <span class="lightbulb">💡</span> LED
+        <span class="lightbulb">🦅🦅🦅</span> LED
     </button>
-    <p>
-
-    </p>
+    <p id="led-status">{{ led_status }}</p> <!-- Display LED status here -->
 
     <a href="/logout">LOGOUT</a>
-    <div id="confirmation-message"></div>
+    
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Function to update the LED status
+            function updateLEDStatus() {
+                $.get('/', function(data) {
+                    // Update the LED status based on the response
+                    $('#confirmation-message').text('LED Status: ' + data.led_status);
+                });
+            }
+    
+            // Call the updateLEDStatus function when the page loads
+            updateLEDStatus();
+    
             $('#led-button').click(function() {
                 $.post('/turn_on_led', function(data) {
                     if (data.message === 'LED turned on') {
                         $('#led-button').removeClass('led-off').addClass('led-on');
-                        $('#confirmation-message').text(data.message);
                     } else {
-                        $('#confirmation-message').text('Failed to turn on LED');
+                        $('#led-button').removeClass('led-on').addClass('led-off');
                     }
+                    
+                    // Update the LED status after the LED button is clicked
+                    updateLEDStatus();
                 });
             });
         });
     </script>
+    
+    
 </body>
 </html>
