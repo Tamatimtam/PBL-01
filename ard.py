@@ -6,7 +6,7 @@ import json
 import bcrypt
 import os
 
-#TES azzuri
+#TES azuri & christian
 
 # Create a Flask application
 app = Flask(__name__)
