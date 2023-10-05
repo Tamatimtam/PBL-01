@@ -1,85 +1,133 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>NodeMCU Control</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="{{ url_for('static', filename='led.png') }}" type="image/png">
+        <title>Controll Pannel Smart Classroom Lab Embedded</title>
+        <style>
+            body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        text-align: center;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
 
-        h1 {
-            color: #333;
-        }
+    header {
+        background-color: #3498db;
+        color: #fff;
+        padding: 20px 0;
+    }
 
-        .button {
-            display: inline-block;
-            background-color: #3498db;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    h1 {
+        font-size: 24px;
+    }
 
-        .button:hover {
-            background-color: #2980b9;
-        }
+    .container {
+        max-width: 600px;
+        margin: 20px auto; /* Add margin to create space */
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+        
+            .button {
+                display: inline-block;
+                background-color: #3498db;
+                color: #fff;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                text-decoration: none;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+        
+            .button:hover {
+                background-color: #2980b9;
+            }
+        
+            .led-icon {
+                font-size: 36px;
+                vertical-align: middle;
+                margin-right: 10px;
+            }
+        
+            .led-on {
+                background-color: #f1c40f;
+            }
+        
+            .led-off {
+                background-color: #ccc;
+            }
+        
+            #led-status {
+                font-size: 18px;
+                margin-top: 20px;
+            }
+        
+            #logout-link {
+                display: block;
+                margin-top: 20px;
+                text-decoration: none;
+                color: #3498db;
+                font-weight: bold;
+                font-size: 18px;
+            }
+        
+            footer {
+        position: fixed; /* Change position to fixed */
+        bottom: 0; /* Place it at the bottom */
+        width: 100%; /* Make it full width */
+        background-color: #3498db;
+        color: #fff;
+        padding: 10px 0;
+        text-align: center;
+    }
 
-        .lightbulb {
-            font-size: 36px;
-            vertical-align: middle;
-            margin-right: 10px;
-        }
+    footer p {
+        margin: 0;
+        font-size: 14px;
+    }
+        </style>
+        
+    </head>
+    <body>
+        <header>
+            <h1>Controll Pannel Smart Classroom Lab Embedded</h1>
+        </header>
+        <div class="container">
+            <button id="led-button" class="button led-off">
+                <span class="led-icon">💡</span> LED
+            </button>
+            <p id="led-status">LED Status: <span id="led-status-text">{{ led_status }}</span></p>
+    
+            <a href="/logout" id="logout-link">LOGOUT</a>
+        </div>
 
-        .led-on {
-            background-color: #f1c40f;
-        }
-
-        .led-off {
-            background-color: #ccc;
-        }
-    </style>
-</head>
-<body>
-    <h1>NodeMCU Control</h1>
-    <button id="led-button" class="button led-off">
-        <span class="lightbulb">🦅🦅🦅</span> LED
-    </button>
-    <p id="led-status">{{ led_status }}</p> <!-- Display LED status here -->
-
-    <a href="/logout">LOGOUT</a>
+        <footer>
+            <p>Made with &lt;3 by Kelompok 1 PBL TMJ-3B</p>
+        </footer>
+    
     
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
-            // Function to update the LED status
-            function updateLEDStatus() {
-                $.get('/', function(data) {
-                    // Update the LED status based on the response
-                    $('#confirmation-message').text('LED Status: ' + data.led_status);
-                });
-            }
-    
-            // Call the updateLEDStatus function when the page loads
-            updateLEDStatus();
-    
-            $('#led-button').click(function() {
-                $.post('/turn_on_led', function(data) {
-                    if (data.message === 'LED turned on') {
-                        $('#led-button').removeClass('led-off').addClass('led-on');
-                    } else {
-                        $('#led-button').removeClass('led-on').addClass('led-off');
-                    }
-                    
-                    // Update the LED status after the LED button is clicked
-                    updateLEDStatus();
-                });
-            });
+     $(document).ready(function() {
+
+    // Click event handler for the LED button
+    $('#led-button').click(function() {
+        $.post('/turn_on_led', function(data) {
+            location.reload();
         });
+    });
+});
+
+
     </script>
     
     
