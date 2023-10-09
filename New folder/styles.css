@@ -1,0 +1,160 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #333;
+    color: #fff;
+    width: 100%;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    margin-left: 28px;
+}
+
+.nav-links {
+    margin-right: 20px;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 20px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.menu-button {
+    width: 100px;
+    height: 100px;
+    margin: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
+.menu-button:hover {
+    transform: scale(1.1);
+}
+
+.menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+}
+
+.menu.expanded {
+    display: block;
+    opacity: 1;
+}
+
+.menu-item {
+    margin: 10px;
+}
+
+/* ... (previous CSS) */
+
+/* Smaller Oval Toggle Switch Styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 70px; /* Adjust the width */
+    height: 40px; /* Adjust the height */
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 20px; /* Half of the height for an oval shape */
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 30px; /* Adjust the height */
+    width: 30px; /* Adjust the width */
+    left: 5px; /* Adjust the left position */
+    top: 5px; /* Adjust the top position */
+    background-color: white;
+    border-radius: 50%;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(28px); /* Adjust the translation */
+    -ms-transform: translateX(28px); /* Adjust the translation */
+    transform: translateX(28px); /* Adjust the translation */
+}
+
+
+/* ... (previous CSS) */
+
+/* Circular Background Styles */
+.emoji-container {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; /* Add cursor pointer to indicate it's clickable */
+    background-color: #333;
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.menu-button:hover .emoji-container {
+    background-color: #2196F3; /* Change to the desired hover background color */
+    transform: scale(1.1); /* Expand on hover */
+}
+
+.emoji-container h1 {
+    font-size: 36px;
+}
+
+.menu-button {
+    margin: 20px;
+    cursor: pointer;
+}
+
