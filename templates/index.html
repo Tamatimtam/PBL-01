@@ -1,135 +1,59 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="{{ url_for('static', filename='led.png') }}" type="image/png">
-        <title>Controll Pannel Smart Classroom Lab Embedded</title>
-        <style>
-            body {
-        font-family: Arial, sans-serif;
-        background-color: #f2f2f2;
-        text-align: center;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-
-    header {
-        background-color: #3498db;
-        color: #fff;
-        padding: 20px 0;
-    }
-
-    h1 {
-        font-size: 24px;
-    }
-
-    .container {
-        max-width: 600px;
-        margin: 20px auto; /* Add margin to create space */
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-        
-            .button {
-                display: inline-block;
-                background-color: #3498db;
-                color: #fff;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                text-decoration: none;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
-        
-            .button:hover {
-                background-color: #2980b9;
-            }
-        
-            .led-icon {
-                font-size: 36px;
-                vertical-align: middle;
-                margin-right: 10px;
-            }
-        
-            .led-on {
-                background-color: #f1c40f;
-            }
-        
-            .led-off {
-                background-color: #ccc;
-            }
-        
-            #led-status {
-                font-size: 18px;
-                margin-top: 20px;
-            }
-        
-            #logout-link {
-                display: block;
-                margin-top: 20px;
-                text-decoration: none;
-                color: #3498db;
-                font-weight: bold;
-                font-size: 18px;
-            }
-        
-            footer {
-        position: fixed; /* Change position to fixed */
-        bottom: 0; /* Place it at the bottom */
-        width: 100%; /* Make it full width */
-        background-color: #3498db;
-        color: #fff;
-        padding: 10px 0;
-        text-align: center;
-    }
-
-    footer p {
-        margin: 0;
-        font-size: 14px;
-    }
-        </style>
-        
-    </head>
-    <body>
-        <header>
-            <h1>Controll Pannel Smart Classroom Lab Embedded</h1>
-        </header>
-        <div class="container">
-            <button id="led-button" class="button led-off">
-                <span class="led-icon">💡</span> LED
-            </button>
-            <p id="led-status">LED Status: <span id="led-status-text">{{ led_status }}</span></p>
-    
-            <a href="/logout" id="logout-link">LOGOUT</a>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Smart Home Control</title>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Smart Home Control</div>
+        <div class="nav-links">
+            <a href="#">Docs</a>
+            <a href="#">Logout</a>
         </div>
+    </div>
+<!-- Lightbulb Button -->
+<div class="menu-button" id="lightbulb-button">
+    <div class="emoji-container" id="led-button">
+        <h1>💡</h1>
+    </div>
+</div>
 
-        <footer>
-            <p>Made with &lt;3 by Kelompok 1 PBL TMJ-3B</p>
-        </footer>
+
+<!-- AC Button -->
+<div class="menu-button" id="ac-button">
+    <div class="emoji-container">
+        <h1>❄</h1>
+    </div>
+</div>
+
+
+       <!-- Lightbulb Menu -->
+       <div class="menu" id="lightbulb-menu">
+        <h2>Light Control</h2>
+        <div class="menu-item">Status: <span id="light-status">Off</span></div>
+        <label class="switch">
+            <input type="checkbox" id="light-toggle">
+            <span class="slider round"></span>
+        </label>
+    </div>
     
-    
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-     $(document).ready(function() {
+<!-- AC Menu -->
+<div class="menu" id="ac-menu">
+    <h2>AC Control</h2>
+    <div class="menu-item">Status: <span id="ac-status">Off</span></div>
+    <label class="switch">
+        <input type="checkbox" id="ac-toggle">
+        <span class="slider round"></span>
+    </label>
+</div>
 
-    // Click event handler for the LED button
-    $('#led-button').click(function() {
-        $.post('/turn_on_led', function(data) {
-            location.reload();
-        });
-    });
-});
+    </div>
 
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
-    </script>
-    
-    
 </body>
 </html>

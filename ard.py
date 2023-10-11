@@ -1,26 +1,26 @@
-# Import necessary libraries
-from flask import Flask, render_template, request, session, redirect, url_for 
+#region Import necessary libraries
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify  
 from flask_mysqldb import MySQL
 import requests
-import json
+import json     
 import bcrypt
 import os
-arduino_url = 'http://192.168.160.179/get_led_status'  # Arduino IP
-
-#TES azzuri
+from requests.exceptions import ConnectionError  # Import ConnectionError
+#endregion
 
 # Create a Flask application
 app = Flask(__name__)
 
-# Configure MySQL connection
+#region Configure MySQL connection
 app.config['MYSQL_HOST'] = 'localhost'  # MySQL server host
 app.config['MYSQL_USER'] = 'root'   # MySQL username
 app.config['MYSQL_PASSWORD'] = ''  # MySQL password
 app.config['MYSQL_DB'] = 'user'  # MySQL database name
+#endregion
 
+arduino_url = 'http://192.168.43.179/get_led_status'  # Arduino IP#
 # Initialize MySQL
 mysql = MySQL(app)
-
 # Secret key for session management
 app.secret_key = os.urandom(24) 
 
@@ -70,8 +70,6 @@ def register():
     return "Access denied. Only administrators can register new users."
 
 
-
-
 # Define a route for the login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -109,8 +107,6 @@ def login():
     # If it's a GET request, render the login form
     return render_template('login.html')
 
-
-
 # Define a route for the home page
 @app.route('/')
 def index():
@@ -127,8 +123,6 @@ def index():
     else:
         return redirect(url_for('login'))  # Redirect to the login page if not logged in
 
-
-
 # Define a route to log out
 @app.route('/logout')
 def logout():
@@ -136,19 +130,18 @@ def logout():
     session.pop('logged_in', None)
     session.pop('username', None)
     return redirect(url_for('login'))
-
-
+# Define route for LED Status
+# In the get_led_status route
 @app.route('/get_led_status', methods=['GET'])
 def get_led_status():
-    # Send a request to Arduino or NodeMCU to get the current LED status
-    response_status = requests.get(arduino_url)  # Replace with the appropriate URL
-
-    if response_status.status_code == 200:
-        # Parse the response and return the status as JSON
-        led_status = response_status.json()  # Assuming the response is in JSON format
-        return jsonify({'status': led_status})
-    else:
-        return jsonify({'status': 'unknown'})  # Return 'unknown' if there's an error
+    try:
+        response_status = requests.get('http://192.168.43.179/get_servo_position')
+        response_status.raise_for_status()  # Raise an exception for HTTP errors
+        servo_position = int(response_status.text)
+        led_status = "ON" if servo_position == 180 else "OFF"
+        return led_status
+    except ConnectionError as e:
+        return 'unknown'  # Handle connection errors
 
 
 
@@ -159,17 +152,23 @@ def turn_on_led():
     # Check if the user is logged in
     if 'logged_in' in session:
         # Send a request to NodeMCU to turn on the LED
-        response_led = requests.get('http://192.168.160.179/turn_on_led')  # NodeMCU IP
-        #if the request is sucessful
-        if response_led.status_code == 200:
-           led_status = response_led.text #put the text response from esp to local variable called led status
-           return render_template('index.html', led_status=led_status) #return index while parsing led_status to the html file
+        response_servo = requests.get('http://192.168.43.179/get_servo_position')  # NodeMCU IP
+        
+        if response_servo.status_code == 200:
+            current_position = int(response_servo.text)  # Convert the response to an integer
+            new_position = 180 if current_position == 0 else 0  # Toggle the position
+            
+            # Send a request to NodeMCU to set the servo position
+            response_led = requests.get(f'http://192.168.43.179/rotate_servo?position={new_position}')
+        
+            if response_led.status_code == 200:
+                return render_template('index.html', led_status='LED turned on' if new_position == 180 else 'LED turned off')
+            else:
+                return render_template('index.html', led_status='Failed to control LED')
         else:
-            led_status = 'Failed to control LED or retrieve LED status'
-            return render_template('index.html', led_status=led_status)
+            return render_template('index.html', led_status='Failed to retrieve servo position')
     else:
-        return redirect(url_for('login'))  # Redirect to the login page if not logged in
-
+        return redirect(url_for('login'))  
 
 
 

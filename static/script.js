@@ -14,8 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleMenu(acMenu);
     });
 
+    // Combine the toggleLight and updateLEDStatus functions into a single event listener
     lightToggle.addEventListener('change', () => {
         toggleStatus('light-status', lightToggle);
+        toggleLight(); // Call the toggleLight function when the toggle changes
     });
 
     acToggle.addEventListener('change', () => {
@@ -44,15 +46,33 @@ document.addEventListener('DOMContentLoaded', function () {
             statusElement.textContent = 'Off';
         }
     }
+
+    function toggleLight() {
+        fetch('/turn_on_led')
+            .then(response => response.text())
+            .then(data => {
+                // Handle the response (if needed)
+                console.log('Light toggle response:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function updateLEDStatus() {
+        fetch('/get_led_status')
+            .then(response => response.text())
+            .then(data => {
+                const lightStatusElement = document.getElementById('light-status');
+                const lightToggle = document.getElementById('light-toggle');
+                lightStatusElement.textContent = data;
+                lightToggle.checked = data === 'ON'; // Set the checkbox status
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Initial update when the page loads
+    updateLEDStatus();
 });
-
-
-$(document).ready(function() {
-    // Click event handler for the LED button
-    $('#light-toggle').click(function() {
-        $.post('/turn_on_led', function(data) {
-            // Handle the response if needed
-        });
-    });
-});
-
