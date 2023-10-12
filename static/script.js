@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function toggleLight() {
-        fetch('/turn_on_led')
+    function toggleLight() { //define toggle light
+        fetch('/turn_on_led') //fetch the turn on led route
             .then(response => response.text())
             .then(data => {
                 // Handle the response (if needed)
@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateLEDStatus() {
-        fetch('/get_led_status')
-            .then(response => response.text())
-            .then(data => {
+        fetch('/get_led_status') //gets response from server
+            .then(response => response.text()) //turns the response into text
+            .then(data => { //takes int the response and processes it to the next few lines
                 const lightStatusElement = document.getElementById('light-status');
                 const lightToggle = document.getElementById('light-toggle');
                 lightStatusElement.textContent = data;

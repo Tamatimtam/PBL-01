@@ -3,8 +3,8 @@
 #include <Servo.h> // Library for controlling servo motors
 #include <ArduinoJson.h> // Library for handling JSON data
 
-const char* ssid = "tama";
-const char* password = "tamatama";
+const char* ssid = "posyandu";
+const char* password = "harshmallow";
 
 // Create an instance of the server
 ESP8266WebServer server(80);

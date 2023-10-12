@@ -18,7 +18,7 @@ app.config['MYSQL_PASSWORD'] = ''  # MySQL password
 app.config['MYSQL_DB'] = 'user'  # MySQL database name
 #endregion
 
-arduino_url = 'http://192.168.43.179/get_led_status'  # Arduino IP#
+arduino_url = 'http://192.168.37.179'  # Arduino IP#
 # Initialize MySQL
 mysql = MySQL(app)
 # Secret key for session management
@@ -130,12 +130,12 @@ def logout():
     session.pop('logged_in', None)
     session.pop('username', None)
     return redirect(url_for('login'))
+    
 # Define route for LED Status
-# In the get_led_status route
 @app.route('/get_led_status', methods=['GET'])
 def get_led_status():
     try:
-        response_status = requests.get('http://192.168.43.179/get_servo_position')
+        response_status = requests.get(f'{arduino_url}/get_servo_position')
         response_status.raise_for_status()  # Raise an exception for HTTP errors
         servo_position = int(response_status.text)
         led_status = "ON" if servo_position == 180 else "OFF"
@@ -143,23 +143,20 @@ def get_led_status():
     except ConnectionError as e:
         return 'unknown'  # Handle connection errors
 
-
-
-
 # Define a route to turn on the LED
-@app.route('/turn_on_led', methods=['POST', 'GET'])
+@app.route('/turn_on_led', methods=['POST', 'GET'   ])
 def turn_on_led():
     # Check if the user is logged in
     if 'logged_in' in session:
         # Send a request to NodeMCU to turn on the LED
-        response_servo = requests.get('http://192.168.43.179/get_servo_position')  # NodeMCU IP
+        response_servo = requests.get(f'{arduino_url}/get_servo_position')  # NodeMCU IP
         
         if response_servo.status_code == 200:
             current_position = int(response_servo.text)  # Convert the response to an integer
             new_position = 180 if current_position == 0 else 0  # Toggle the position
             
             # Send a request to NodeMCU to set the servo position
-            response_led = requests.get(f'http://192.168.43.179/rotate_servo?position={new_position}')
+            response_led = requests.get(f'{arduino_url}/rotate_servo?position={new_position}')
         
             if response_led.status_code == 200:
                 return render_template('index.html', led_status='LED turned on' if new_position == 180 else 'LED turned off')
