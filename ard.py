@@ -13,8 +13,8 @@ app = Flask(__name__)
 
 #region Configure MySQL connection
 app.config['MYSQL_HOST'] = 'localhost'  # MySQL server host
-app.config['MYSQL_USER'] = 'root'   # MySQL username
-app.config['MYSQL_PASSWORD'] = ''  # MySQL password
+app.config['MYSQL_USER'] = 'ADMIN-TMJ3B'   # MySQL username
+app.config['MYSQL_PASSWORD'] = 'IniPassword1'  # MySQL password
 app.config['MYSQL_DB'] = 'user'  # MySQL database name
 #endregion
 

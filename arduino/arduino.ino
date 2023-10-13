@@ -3,7 +3,7 @@
 #include <Servo.h> // Library for controlling servo motors
 #include <ArduinoJson.h> // Library for handling JSON data
 
-const char* ssid = "posyandu";
+        const char* ssid = "posyandu";
 const char* password = "harshmallow";
 
 // Create an instance of the server
