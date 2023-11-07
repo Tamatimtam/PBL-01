@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='table.css')}}">
+    <title>User Logs</title>
+</head>
+<body>
+    <div class="container">
+        <h1>User Logs</h1>
+     <!-- Add a table to display the logs -->
+     <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through the logs and populate the table rows -->
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.username }}</td>
+                    <td>{{ log.timestamp }}</td>
+                    <td>{{ log.action }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/login">Back to Home</a>
+</div>
+</body>
+</html>

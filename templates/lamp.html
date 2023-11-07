@@ -81,18 +81,39 @@
         if (lampToggle.checked) {
             // Lamp is turned on
             lampStatus.textContent = "Lamp ON";
-            lampStatus.classList.remove("off");
-            lampStatus.classList.add("on");
             console.log("Lamp is turned on");
         } else {
             // Lamp is turned off
             lampStatus.textContent = "Lamp OFF";
-            lampStatus.classList.remove("on");
-            lampStatus.classList.add("off");
             console.log("Lamp is turned off");
         }
+        fetch('/get_led_status') //gets response from server
+            .then(response => response.text()) //turns the response into text
+            .then(data => { //takes int the response and processes it to the next few lines
+                const lightStatusElement = document.getElementById('lamp-status');
+                const lightToggle = document.getElementById('lamp-toggle');
+                if (data == 'Lampu Nyala!'){
+                    lightToggle.checked = 1;}
+                else{lightToggle.checked = 0;}
+                lightStatusElement.textContent = data;
+            })
     });
 
+    function updateLEDStatus() {
+        fetch('/get_led_status') //gets response from server
+            .then(response => response.text()) //turns the response into text
+            .then(data => { //takes int the response and processes it to the next few lines
+                const lightStatusElement = document.getElementById('lamp-status');
+                const lightToggle = document.getElementById('lamp-toggle');
+                lightStatusElement.textContent = data;
+                lightToggle.checked = data === 'Lampu Nyala!'; // Set the checkbox status
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    updateLEDStatus();
     
 </script>
 </body>

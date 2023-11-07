@@ -1,0 +1,67 @@
+/* Body styles for the user logs page */
+body {
+    background-color: #121212; /* Dark background color */
+    color: #ffffff; /* Text color */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Vertically center content */
+}
+
+/* Container styles */
+.container {
+    text-align: center;
+    padding: 20px; /* Adjust padding as needed */
+}
+
+/* Header styles */
+h1 {
+    font-size: 36px;
+    color: #FF6D00; /* Violet highlight color */
+    margin-bottom: 20px;
+}
+
+/* Table styles */
+table {
+    width: 80%; /* Set the width of the table */
+    margin: 0 auto; /* Center the table horizontally */
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px; /* Adjust cell padding as needed */
+    border: 1px solid #6E2677; /* Table cell border */
+    text-align: center;
+}
+
+thead {
+    background-color: #6E2677; /* Header background color */
+    color: #ffffff; /* Header text color */
+}
+
+tbody {
+    background-color: #282828; /* Table body background color */
+    color: #ffffff; /* Table body text color */
+}
+
+/* Button styles */
+a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #6E2677; /* Dull violet button background color */
+    color: #ffffff; /* Button text color */
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 10px;
+    transition: background-color 0.3s; /* Smooth hover transition */
+}
+
+/* Hover effect for buttons */
+a:hover {
+    background-color: #FF6D00; /* Vibrant violet on hover */
+    color: #ffffff;
+}
