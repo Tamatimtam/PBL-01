@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AC Control</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="main">  
+    <input type="checkbox" id="chk" aria-hidden="true">
+    
+    <div class="ac-control">
+        <label for="chk" aria-hidden="true">AC Control</label>
+    </div>
+    
+    <div class="toggle-box">
+        <div class="toggle-control">
+            <label class="switch">
+                <input type="checkbox" id="ac-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span id="ac-status">AC OFF</span>
+        </div>
+    </div>
+    
+    <div class="temperature-box">
+        <div class="temperature-control">
+            <button id="decrease-temp">-</button>
+            <span id="temperature">22°C</span>
+            <button id="increase-temp">+</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles for the toggle box */
+    .toggle-box {
+        background: #fff;
+        border-radius: 20px;
+        margin: 20px 30px 1px;
+        padding: 10px;
+    }
+
+    /* Styles for the temperature box */
+    .temperature-box {
+        background: #fff;
+        border-radius: 20px;
+        margin: 20px 30px;
+        padding: 20px;
+    }
+
+    /* Styles for centering the toggle and "AC ON" or "AC OFF" text */
+    .ac-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .ac-control label {
+        margin: 10px;
+    }
+
+    /* Specific selectors for AC ON and AC OFF text */
+    /* Specific selectors for AC ON and AC OFF text */
+    .toggle-control #ac-status {
+        color: black;
+        margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
+    }
+
+    .toggle-control #ac-status.on {
+        color: green; /* Green color for "AC ON" */
+    }
+
+    .toggle-control #ac-status.off {
+        color: red; /* Red color for "AC OFF" */
+    }
+
+    .toggle-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<script>
+    const temperatureLabel = document.getElementById("temperature");
+    const decreaseTempButton = document.getElementById("decrease-temp");
+    const increaseTempButton = document.getElementById("increase-temp");
+    const chk = document.getElementById("chk");
+    const acToggle = document.getElementById("ac-toggle");
+    const acStatus = document.getElementById("ac-status");
+
+    let temperature = 22;
+
+    // Function to update the temperature label
+    function updateTemperature() {
+        temperatureLabel.textContent = temperature + "°C";
+    }
+
+    // Event listener for decreasing temperature
+    decreaseTempButton.addEventListener("click", () => {
+        if (temperature > 16) {
+            temperature--;
+            updateTemperature();
+        }
+    });
+
+    // Event listener for increasing temperature
+    increaseTempButton.addEventListener("click", () => {
+        if (temperature < 30) {
+            temperature++;
+            updateTemperature();
+        }
+    });
+
+    // Event listener for toggling AC on and off
+    acToggle.addEventListener("change", () => {
+        if (acToggle.checked) {
+            // AC is turned on
+            acStatus.textContent = "AC ON";
+            acStatus.classList.remove("off");
+            acStatus.classList.add("on");
+            console.log("AC is turned on");
+        } else {
+            // AC is turned off
+            acStatus.textContent = "AC OFF";
+            acStatus.classList.remove("on");
+            acStatus.classList.add("off");
+            console.log("AC is turned off");
+        }
+    });
+</script>
+</body>
+</html>

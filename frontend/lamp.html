@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Lamp Control</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="main">  
+    <input type="checkbox" id="chk" aria-hidden="true">
+    
+    <div class="lamp-control">
+        <label for="chk" aria-hidden="true">Lamp Control</label>
+    </div>
+    
+    <div class="toggle-box">
+        <div class="toggle-control">
+            <label class="switch">
+                <input type="checkbox" id="lamp-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span id="lamp-status">Lamp OFF</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles for the toggle box */
+    .toggle-box {
+        background: #fff;
+        border-radius: 30px;
+        margin: 90px 30px 1px;
+        padding: 20px;
+    }
+
+    /* Styles for centering the toggle and "Lamp ON" or "Lamp OFF" text */
+    .lamp-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .lamp-control label {
+        margin: 10px;
+    }
+
+    /* Specific selectors for Lamp ON and Lamp OFF text */
+    .toggle-control #lamp-status {
+        color: black;
+        margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
+    }
+
+    .toggle-control #lamp-status.on {
+        color: green; /* Green color for "Lamp ON" */
+    }
+
+    .toggle-control #lamp-status.off {
+        color: red; /* Red color for "Lamp OFF" */
+    }
+
+    .toggle-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<script>
+    const chk = document.getElementById("chk");
+    const lampToggle = document.getElementById("lamp-toggle");
+    const lampStatus = document.getElementById("lamp-status");
+
+    // Event listener for toggling Lamp on and off
+    lampToggle.addEventListener("change", () => {
+        if (lampToggle.checked) {
+            // Lamp is turned on
+            lampStatus.textContent = "Lamp ON";
+            lampStatus.classList.remove("off");
+            lampStatus.classList.add("on");
+            console.log("Lamp is turned on");
+        } else {
+            // Lamp is turned off
+            lampStatus.textContent = "Lamp OFF";
+            lampStatus.classList.remove("on");
+            lampStatus.classList.add("off");
+            console.log("Lamp is turned off");
+        }
+    });
+</script>
+</body>
+</html>
