@@ -7,27 +7,28 @@
 <body>
     <div class="container">
         <h1>User Logs</h1>
-     <!-- Add a table to display the logs -->
-     <table>
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Timestamp</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Loop through the logs and populate the table rows -->
-            {% for log in logs %}
+        <!-- Add a table to display the logs -->
+        <table class="logs-table">
+            <thead>
                 <tr>
-                    <td>{{ log.username }}</td>
-                    <td>{{ log.timestamp }}</td>
-                    <td>{{ log.action }}</td>
+                    <th>User</th>
+                    <th>Timestamp</th>
+                    <th>Action</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="/login">Back to Home</a>
-</div>
+            </thead>
+            <tbody>
+                <!-- Loop through the logs and populate the table rows -->
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.username }}</td>
+                        <td>{{ log.timestamp }}</td>
+                        <td>{{ log.action }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <a href="/login">Back to Home</a>
+    </div>
 </body>
 </html>
