@@ -5,6 +5,7 @@
     <link rel="preload" as="style" href="style_in.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='loggedIn.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+    <meta name="view-transition"    content="same-origin"/>
 </head>
 <body>
 <div class="main">  
@@ -12,6 +13,7 @@
     <div class="signup">
         <form class="login-form" action="/login" method="POST">
             <label for="chk" aria-hidden="true">Logged in!</label>
+
             <input type="text" name="txt" placeholder="User name" required="">
             <input type="password" name="pswd" placeholder="Password" required="">
             <select name="userType" required>
@@ -28,8 +30,23 @@
             <a href="lamp" class="menu-button">Control Lampu 💡</a>
             <a href="ac" class="menu-button">Control AC ❄️</a>
             <a href="register" class="menu-button">Register User Baru</a>
+            <button id="toggle-class-session" class="menu-button" onclick="toggleClassSession()" style="font-size: 17px;">
+                {% if state %}
+                    Class is in session!
+                    <script>document.getElementById('toggle-class-session').style.backgroundColor = "#6d44b8";</script>
+                {% else %}
+                    Class is not in session.
+                    <script>document.getElementById('toggle-class-session').style.backgroundColor = "#d7c9e5";</script>
+                {% endif %}
+            </button>
         </form>
     </div>
 </div>
 </body>
+
+<script>function toggleClassSession() {
+            fetch('/manage_session') //gets response from server   
+}</script>
+
+
 </html>
