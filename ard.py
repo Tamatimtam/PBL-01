@@ -181,7 +181,6 @@ def logout():
     session.pop('role', None)
     return redirect(url_for('login'))
 
-    
 # Define route for LED Status
 @app.route('/get_led_status', methods=['GET'])
 def get_led_status():
@@ -203,7 +202,10 @@ def get_led_status():
 @app.route('/turn_on_led', methods=['POST', 'GET'])
 def turn_on_led():
     # Check if the user is logged in
-    if 'logged_in' in session:
+    if 'logged_in' in session :
+        if class_session_in_progress:
+            error = "Access to the lamp is locked during class session."
+            return render_template('loggedIn.html', error = error)
         # Send a request to NodeMCU to turn on the LED
         response = requests.get(f'{arduino_url}/turn_on_led')  # NodeMCU IP
         username = session['username']

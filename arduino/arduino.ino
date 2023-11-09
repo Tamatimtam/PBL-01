@@ -1,8 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
-     
-   const char* ssid = "snsv";
+        const char* ssid = "snsv";
 const char* password = "nataniel";
 const int relay_pin = D2;
 

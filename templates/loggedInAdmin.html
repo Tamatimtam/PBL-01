@@ -45,7 +45,11 @@
 </body>
 
 <script>function toggleClassSession() {
-            fetch('/manage_session') //gets response from server   
+            fetch('/manage_session') 
+            .then(() => {
+                // Reload the page after the fetch is complete
+                location.reload();
+            });//gets response from server   
 }</script>
 
 

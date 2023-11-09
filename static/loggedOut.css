@@ -8,7 +8,19 @@ body {
     font-family: 'Jost', sans-serif;
     /* background: linear-gradient(to left, #FEAC5E, #C779D0,#4bc0c8);
     option 2: https://wallpaperaccess.com/full/2551087.jpg  */
-    background: url("https://images.alphacoders.com/127/1276993.jpg") no-repeat center/cover;
+    background: url('/static/bg.jpg') no-repeat center/cover;
+    
+    /* Darken the background with an overlay */
+&::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2); /* Adjust the alpha (last) value to control the darkness (0.5 is 50% opacity) */
+}
+
 }
 
 .shape{

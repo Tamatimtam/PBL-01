@@ -81,11 +81,11 @@
         toggleLight()
         if (lampToggle.checked) {
             // Lamp is turned on
-            lampStatus.textContent = "Lamp ON";
+            lampStatus.textContent = "Lampu Nyala!";
             console.log("Lamp is turned on");
         } else {
             // Lamp is turned off
-            lampStatus.textContent = "Lamp OFF";
+            lampStatus.textContent = "Lampu Mati!";
             console.log("Lamp is turned off");
         }
         fetch('/get_led_status') //gets response from server
@@ -98,6 +98,7 @@
                 else{lightToggle.checked = 0;}
                 lightStatusElement.textContent = data;
             })
+        updateLEDStatus();
     });
 
     function updateLEDStatus() {
