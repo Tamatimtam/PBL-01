@@ -5,6 +5,7 @@
     <link rel="preload" as="style" href="style_in.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='loggedIn.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+    <meta name="view-transition"    content="same-origin"/>
 </head>
 <body>
 <div class="main">  
@@ -25,6 +26,7 @@
     <div class="welcome">
         <form>
             <label style="text-align: center;" for="chk" aria-hidden="true">Welcome {{ name }}!</label>
+            <p style="margin: 10px; text-align: center;">{{ error }}</p>
             <a href="lamp" class="menu-button">Control Lampu 💡</a>
             <a href="ac" class="menu-button">Control AC ❄️</a>
         </form>

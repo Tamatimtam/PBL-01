@@ -6,6 +6,8 @@ import bcrypt
 import os
 from requests.exceptions import ConnectionError
 
+#COBA AZZURI 12345
+
 # Create a Flask application
 app = Flask(__name__)
 
@@ -22,6 +24,10 @@ mysql = MySQL(app)
 
 # Secret key for session management
 app.secret_key = os.urandom(24)
+
+# Fitur buat locking
+class_session_in_progress = True
+
 
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
@@ -72,9 +78,10 @@ def menu():
 def menu_admin():
     if 'logged_in' in session and session['role'] == 'admin':
         name = session['username']
-        return render_template('loggedInAdmin.html', name=name)
+        state = class_session_in_progress
+        return render_template('loggedInAdmin.html', name=name, state = state)
     error = 'Please log in!'
-    return render_template('loggedOut.html', error=error)
+    return render_template('loggedOut.html', error =error)
 
 # Define a route for the login page
 @app.route('/login', methods=['GET', 'POST'])
@@ -116,7 +123,10 @@ def index():
 # Define a route for the lamp page
 @app.route('/lamp')
 def lamp():
-    if 'logged_in' in session:
+    if 'logged_in' in session :
+        if class_session_in_progress == True and session['role'] == 'user':
+            error = "Access to the lamp is locked during class session."
+            return render_template('loggedIn.html', error = error)
         return render_template('lamp.html')
     else:
         return redirect(url_for('login'))
@@ -148,6 +158,21 @@ def view_logs():
     #else:
      #   return redirect(url_for('login'))
 
+# Route for Locking Users
+@app.route('/manage_session', methods=['POST', 'GET'])
+def manage_session():
+    global class_session_in_progress
+    if 'logged_in' in   session:
+            if class_session_in_progress == False:
+                class_session_in_progress = True
+                return "session was false now true"
+            else :
+                class_session_in_progress = False
+                return "session was true now false"
+    else:
+        return redirect(url_for('login'))
+
+
 # Define a route to log out
 @app.route('/logout')
 def logout():
@@ -156,7 +181,6 @@ def logout():
     session.pop('role', None)
     return redirect(url_for('login'))
 
-    
 # Define route for LED Status
 @app.route('/get_led_status', methods=['GET'])
 def get_led_status():
@@ -178,7 +202,10 @@ def get_led_status():
 @app.route('/turn_on_led', methods=['POST', 'GET'])
 def turn_on_led():
     # Check if the user is logged in
-    if 'logged_in' in session:
+    if 'logged_in' in session :
+        if class_session_in_progress:
+            error = "Access to the lamp is locked during class session."
+            return render_template('loggedIn.html', error = error)
         # Send a request to NodeMCU to turn on the LED
         response = requests.get(f'{arduino_url}/turn_on_led')  # NodeMCU IP
         username = session['username']
