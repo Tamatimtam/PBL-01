@@ -6,8 +6,6 @@ import bcrypt
 import os
 from requests.exceptions import ConnectionError
 
-#COBA AZZURI 12345
-
 # Create a Flask application
 app = Flask(__name__)
 
@@ -30,7 +28,7 @@ class_session_in_progress = True
 
 
 #CLASS USER
-# User class
+# User classSSS
 class User:
     def __init__(self, username, hashed_password, role):
         self.username = username
