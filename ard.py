@@ -83,6 +83,9 @@ def menu_admin():
     error = 'Please log in!'
     return render_template('loggedOut.html', error =error)
 
+@app.route('/deluser')
+def deluser():
+    pass
 # Define a route for the login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
