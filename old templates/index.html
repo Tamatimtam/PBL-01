@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Smart Home Control</title>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Smart Home Control</div>
+        <div class="nav-links">
+            <a href="#">Docs</a>
+            <a href="#">Logout</a>
+        </div>
+    </div>
+<!-- Lightbulb Button -->
+<div class="menu-button" id="lightbulb-button">
+    <div class="emoji-container" id="led-button">
+        <h1>💡</h1>
+    </div>
+</div>
+
+
+<!-- AC Button -->
+<div class="menu-button" id="ac-button">
+    <div class="emoji-container">
+        <h1>❄</h1>
+    </div>
+</div>
+
+
+       <!-- Lightbulb Menu -->
+       <div class="menu" id="lightbulb-menu">
+        <h2>Light Control</h2>
+        <div class="menu-item">Status: <span id="light-status">Off</span></div>
+        <label class="switch">
+            <input type="checkbox" id="light-toggle">
+            <span class="slider round"></span>
+        </label>
+    </div>
+    
+
+<!-- AC Menu -->
+<div class="menu" id="ac-menu">
+    <h2>AC Control</h2>
+    <div class="menu-item">Status: <span id="ac-status">Off</span></div>
+    <label class="switch">
+        <input type="checkbox" id="ac-toggle">
+        <span class="slider round"></span>
+    </label>
+</div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
