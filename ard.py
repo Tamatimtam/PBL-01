@@ -176,7 +176,9 @@ def view_logs():
 # Route for Locking Users
 @app.route('/manage_session', methods=['POST', 'GET'])
 def manage_session():
+    
     global class_session_in_progress
+    print (class_session_in_progress)
     if 'logged_in' in   session:
             if class_session_in_progress == False:
                 class_session_in_progress = True
