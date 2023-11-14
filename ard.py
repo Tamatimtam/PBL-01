@@ -86,6 +86,11 @@ def menu_admin():
 @app.route('/deluser')
 def deluser():
     pass
+
+@app.route('update_user')
+def update_user():
+    pass
+
 # Define a route for the login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
