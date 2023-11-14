@@ -6,8 +6,6 @@ import bcrypt
 import os
 from requests.exceptions import ConnectionError
 
-#COBA AZZURI 12345
-
 # Create a Flask application
 app = Flask(__name__)
 
@@ -29,6 +27,40 @@ app.secret_key = os.urandom(24)
 class_session_in_progress = True
 
 
+#CLASS USER
+# User classSSS
+class User:
+    def __init__(self, username, hashed_password, role):
+        self.username = username
+        self.hashed_password = hashed_password
+        self.role = role
+
+    def check_password(self, password):
+        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+
+    @classmethod
+    def get_user_by_username(cls, username):
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM login_table WHERE username = %s", (username,))
+        user_data = cur.fetchone()
+        cur.close()
+
+        if user_data:
+            return cls(username=user_data[1], hashed_password=user_data[2], role=user_data[3])
+        return None
+
+    @classmethod
+    def create_user(cls, username, password, role):
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
+                    (username, hashed_password, role))
+        mysql.connection.commit()
+        cur.close()
+        return cls(username=username, hashed_password=hashed_password, role=role)
+
+
+
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -38,23 +70,13 @@ def register():
             raw_password = request.form['pswd']
             role = request.form['userType']
 
-            hashed_password = bcrypt.hashpw(raw_password.encode('utf-8'), bcrypt.gensalt())
-
-            cur = mysql.connection.cursor()
-
-            cur.execute("SELECT * FROM login_table WHERE username = %s", (username,))
-            existing_user = cur.fetchone()
+            existing_user = User.get_user_by_username(username)
 
             if existing_user:
                 error = 'Username already exists'
-                cur.close()
                 return render_template('register.html', error=error)
 
-            cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
-                        (username, hashed_password, role))
-            mysql.connection.commit()
-
-            cur.close()
+            User.create_user(username, raw_password, role)
 
             success_message = 'User registered successfully'
             return render_template('register.html', success_message=success_message)
@@ -63,7 +85,7 @@ def register():
 
     error = 'Only Admins can register new users, please contact an admin!'
     return render_template('loggedOut.html', error=error)
-
+        
 # Define a route for the redirect to lamp or ac page
 @app.route('/menu')
 def menu():
@@ -83,13 +105,6 @@ def menu_admin():
     error = 'Please log in!'
     return render_template('loggedOut.html', error =error)
 
-@app.route('/deluser')
-def deluser():
-    pass
-
-@app.route('update_user')
-def update_user():
-    pass
 
 # Define a route for the login page
 @app.route('/login', methods=['GET', 'POST'])
@@ -98,24 +113,16 @@ def login():
         username = request.form['txt']
         password = request.form['pswd']
 
-        cur = mysql.connection.cursor()
+        user = User.get_user_by_username(username)
 
-        cur.execute("SELECT * FROM login_table WHERE username = %s", (username,))
-        user = cur.fetchone()
+        if user and user.check_password(password):
+            session['logged_in'] = True
+            session['username'] = user.username
+            session['role'] = user.role
 
-        cur.close()
-
-        if user is not None:
-            hashed_password_from_db = user[2].encode('utf-8')
-
-            if bcrypt.checkpw(password.encode('utf-8'), hashed_password_from_db):
-                session['logged_in'] = True
-                session['username'] = username
-                session['role'] = user[3]
-
-                if session['role'] == 'admin':
-                    return redirect(url_for('menu_admin'))
-                return redirect(url_for('menu'))
+            if user.role == 'admin':
+                return redirect(url_for('menu_admin'))
+            return redirect(url_for('menu'))
 
         error = 'Invalid login'
         return render_template('loggedOut.html', error=error)
