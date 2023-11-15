@@ -216,7 +216,6 @@ def turn_on_led():
             return render_template('loggedIn.html', error = error)
         # Send a request to NodeMCU to turn on the LED
         response = requests.get(f'{arduino_url}/turn_on_led')  # NodeMCU IP
-        username = session['username']
         if response.text == "LED turned on":
             action = "Turn on LED"
         else:
