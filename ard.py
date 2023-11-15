@@ -15,16 +15,18 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'user'
 
-arduino_url = 'http://192.168.71.105'
+
+arduino_url = 'http://192.168.215.105'
 
 # Initialize MySQL
 mysql = MySQL(app)
+
 
 # Secret key for session management
 app.secret_key = os.urandom(24)
 
 # Fitur buat locking
-class_session_in_progress = True
+class_session_in_progress = False
 
 
 #CLASS USER
@@ -127,8 +129,8 @@ def login():
         error = 'Invalid login'
         return render_template('loggedOut.html', error=error)
 
-    error = ''
-    return render_template('loggedOut.html', error=error)
+    
+    return render_template('loggedOut.html')
 
 # Define a route for the home page
 @app.route('/')
@@ -137,7 +139,7 @@ def index():
 
 # Define a route for the lamp page
 @app.route('/lamp')
-def lamp():
+def lamp(): 
     if 'logged_in' in session :
         if class_session_in_progress == True and session['role'] == 'user':
             error = "Access to the lamp is locked during class session."
