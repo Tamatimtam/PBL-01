@@ -70,6 +70,14 @@
 </style>
 
 <script>
+        // Add this script to handle the back button click
+document.getElementById('backButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    history.back(); // Go back to the previous page in the browser history
+});
+</script>
+
+<script>
     const lampToggle = document.getElementById("lamp-toggle");
     const lampStatus = document.getElementById("lamp-status");
 
@@ -120,11 +128,7 @@
 
 
 
-    // Add this script to handle the back button click
-document.getElementById('backButton').addEventListener('click', function(event) {
-    event.preventDefault();
-    history.back(); // Go back to the previous page in the browser history
-});
+
 
     
 </script>

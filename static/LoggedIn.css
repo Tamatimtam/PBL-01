@@ -291,9 +291,8 @@ input:checked + .slider:before {
 
 /* Add this style for the back button */
 .back-button {
-    position: absolute;
-    top: 240px;
-    left: 520px;
+    margin-left: 3%;
+    top: 200px;
     color: #fff;
     text-decoration: none;
     font-size: 1.2em;
