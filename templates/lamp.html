@@ -8,6 +8,8 @@
 </head>
 <body>
 <div class="main">  
+    <a href="#" class="back-button" id="backButton">&larr; Back</a>
+
     <input type="checkbox" id="chk" aria-hidden="true">
     
     <div class="lamp-control">
@@ -115,6 +117,15 @@
     }
 
     updateLEDStatus();
+
+
+
+    // Add this script to handle the back button click
+document.getElementById('backButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    history.back(); // Go back to the previous page in the browser history
+});
+
     
 </script>
 </body>

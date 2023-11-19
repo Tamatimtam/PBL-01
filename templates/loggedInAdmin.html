@@ -9,7 +9,8 @@
 </head>
 <body>
 <div class="main">  
-    <input type="checkbox" id="chk" aria-hidden="true">
+    <a href="#" class="back-button" id="backButton">&larr; Back</a>
+        <input type="checkbox" id="chk" aria-hidden="true">
     <div class="signup">
         <form class="login-form" action="/login" method="POST">
             <label for="chk" aria-hidden="true">Logged in!</label>
@@ -37,6 +38,8 @@
                     Class is not in session.
                 {% endif %}
             </button>
+            <a href="{{ url_for('logout') }}" class="menu-button">Logout</a>
+
         </form>
     </div>
 </div>
@@ -51,6 +54,13 @@
             location.reload();
         });
 });
+
+// Add this script to handle the back button click
+document.getElementById('backButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    history.back(); // Go back to the previous page in the browser history
+});
+
 </script>
 
 </html>
