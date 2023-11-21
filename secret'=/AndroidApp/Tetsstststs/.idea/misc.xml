@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/contoh/PBL-01/AndroidApp/Tetsstststs/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.3769230769230769" />
+        <entry key="..\:/contoh/PBL-01/AndroidApp/Tetsstststs/app/src/main/res/drawable/ic_launcher_background.xml" value="0.3769230769230769" />
+        <entry key="..\:/contoh/PBL-01/AndroidApp/Tetsstststs/app/src/main/res/layout/activity_splash.xml" value="0.20520833333333333" />
+        <entry key="..\:/contoh/PBL-01/AndroidApp/Tetsstststs/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.3769230769230769" />
         <entry key="..\:/contoh/Tetsstststs/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
         <entry key="..\:/contoh/Tetsstststs/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
         <entry key="..\:/contoh/Tetsstststs/app/src/main/res/layout/activity_main.xml" value="0.36666666666666664" />

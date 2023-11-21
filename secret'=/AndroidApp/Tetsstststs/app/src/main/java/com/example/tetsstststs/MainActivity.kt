@@ -29,6 +29,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Load a website URL
-        webView.loadUrl("https://4573-2a09-bac5-3a0a-15f-00-23-448.ngrok-free.app/")
+        webView.loadUrl("https://26ec-2a09-bac5-3a08-18d2-00-279-1.ngrok-free.app ")
     }
 }
