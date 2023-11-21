@@ -55,17 +55,7 @@ class User:
     def create_user(cls, username, password, role):
         hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
-        # Adding more complexity to the stored hashed password 
-        # Convert the string to a list of characters
-        string_list = list(hashed_password1)
-
-        # Shuffle the characters based on the specified scenario
-        length = len(string_list)
-        for i in range(length // 2):
-            string_list[i], string_list[length - 1 - i] = string_list[length - 1 - i], string_list[i]
-
-        # Convert the list back to a string
-        hashed_password = ''.join(string_list)
+        hashed_password = hashed_password1.replace('$', '').replace('.', '')
 
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
