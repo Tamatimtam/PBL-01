@@ -38,7 +38,15 @@ class User:
         self.role = role
 
     def check_password(self, password):
-        return bcrypt.checkpw('$'.join([password[:0], password[1:3], password[3:5], password[5:]]).encode('utf-8'), self.hashed_password.encode('utf-8'))
+        cur = mysql.connection.cursor()
+
+        cur.execute("SELECT password FROM login_table WHERE username = %s", (self.username,))
+        password2 = cur.fetchone()
+        password2 = password2[0]
+        password = '$'.join([password2[:0], password2[1:3], password2[3:5], password2[5:]])
+
+        cur.close()
+        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
 
     @classmethod
     def get_user_by_username(cls, username):
