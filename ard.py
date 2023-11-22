@@ -38,7 +38,7 @@ class User:
         self.role = role
 
     def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+        return bcrypt.checkpw('$'.join([password[:0], password[1:3], password[3:5], password[5:]]).encode('utf-8'), self.hashed_password.encode('utf-8'))
 
     @classmethod
     def get_user_by_username(cls, username):
@@ -54,7 +54,7 @@ class User:
     @classmethod
     def create_user(cls, username, password, role):
         hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        hashed_password = hashed_password1.decode("utf-8").replace('$', '').replace('.', '')
+        hashed_password = hashed_password1.decode("utf-8").replace('$', '')
         
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
