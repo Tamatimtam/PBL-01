@@ -54,9 +54,8 @@ class User:
     @classmethod
     def create_user(cls, username, password, role):
         hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-
-        hashed_password = hashed_password1.replace('$', '').replace('.', '')
-
+        hashed_password = hashed_password1.decode("utf-8").replace('$', '').replace('.', '')
+        
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
                     (username, hashed_password, role))
