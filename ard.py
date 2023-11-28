@@ -38,14 +38,14 @@ class User:
         self.role = role
 
     def check_password(self, password):
-        cur = mysql.connection.cursor()
+        # cur = mysql.connection.cursor()
 
-        cur.execute("SELECT password FROM login_table WHERE username = %s", (self.username,))
-        password2 = cur.fetchone()
-        password2 = password2[0]
-        password = '$'.join([password2[:0], password2[1:3], password2[3:5], password2[5:]])
+        # cur.execute("SELECT password FROM login_table WHERE username = %s", (self.username,))
+        # password2 = cur.fetchone()
+        # password2 = password2[0]
+        # password = '$'.join([password2[:0], password2[1:3], password2[3:5], password2[5:]])
 
-        cur.close()
+        # cur.close()
         return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
 
     @classmethod
@@ -61,9 +61,10 @@ class User:
 
     @classmethod
     def create_user(cls, username, password, role):
-        hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        hashed_password = hashed_password1.decode("utf-8").replace('$', '')
-        
+        # hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        # hashed_password = hashed_password1.decode("utf-8").replace('$', '')
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
                     (username, hashed_password, role))
