@@ -271,3 +271,23 @@ input:checked + .slider:before {
     color: #fff;
     margin: 10px 0;
 }
+
+
+/* Add this style for the back button */
+.back-button {
+    position: absolute;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: color 0.2s ease-in;
+}
+
+
+
+.back-button:hover {
+    color: #6d44b8; /* Change the color on hover as desired */
+}

@@ -6,11 +6,11 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='loggedIn.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
     <meta name="view-transition"    content="same-origin"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 </head>
 <body>
 <div class="main">  
-    <input type="checkbox" id="chk" aria-hidden="true">
-    <div class="signup">
+    <a href="#" class="back-button" id="backButton">&larr; Back</a>    <div class="signup">
         <form class="login-form" action="/login" method="POST">
             <label for="chk" aria-hidden="true">Logged in!</label>
             <input type="text" name="txt" placeholder="User name" required="">
@@ -29,8 +29,21 @@
             <p style="margin: 10px; text-align: center;">{{ error }}</p>
             <a href="lamp" class="menu-button">Control Lampu 💡</a>
             <a href="ac" class="menu-button">Control AC ❄️</a>
+            <a href="{{ url_for('logout') }}" class="menu-button">Logout</a>
         </form>
     </div>
 </div>
 </body>
+
+
+<script>
+// Add this script to handle the back button click
+document.getElementById('backButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    history.back(); // Go back to the previous page in the browser history
+});
+
+
+
+</script>
 </html>

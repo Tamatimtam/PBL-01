@@ -5,9 +5,12 @@
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='loggedIn.css')}}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
     <meta name="view-transition"    content="same-origin"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 </head>
 <body>
 <div class="main">  
+    <a href="#" class="back-button" id="backButton">&larr; Back</a>
+
     <input type="checkbox" id="chk" aria-hidden="true">
     
     <div class="lamp-control">
@@ -68,7 +71,14 @@
 </style>
 
 <script>
-    const chk = document.getElementById("chk");
+        // Add this script to handle the back button click
+document.getElementById('backButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    history.back(); // Go back to the previous page in the browser history
+});
+</script>
+
+<script>
     const lampToggle = document.getElementById("lamp-toggle");
     const lampStatus = document.getElementById("lamp-status");
 
@@ -106,6 +116,11 @@
     }
 
     updateLEDStatus();
+
+
+
+
+
     
 </script>
 </body>

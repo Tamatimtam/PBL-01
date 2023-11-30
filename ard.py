@@ -15,16 +15,18 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'user'
 
-arduino_url = 'http://192.168.71.105'
+
+arduino_url = 'http://192.168.215.105'
 
 # Initialize MySQL
 mysql = MySQL(app)
+
 
 # Secret key for session management
 app.secret_key = os.urandom(24)
 
 # Fitur buat locking
-class_session_in_progress = True
+class_session_in_progress = False
 
 
 #CLASS USER
@@ -36,7 +38,16 @@ class User:
         self.role = role
 
     def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+        password1 = list(self.hashed_password)
+        
+        # re sort pw before hashing
+        if password1[0] != "$" or password1[3] != "$" or password1[6] != "$":
+            password1[8], password1[0] = password1[0], password1[8]
+            password1[9], password1[3] = password1[3], password1[9]
+            password1[11], password1[6] = password1[6], password1[11]
+
+            password1 = ''.join(password1)
+            return bcrypt.checkpw(password.encode('utf-8'), password1.encode('utf-8'))
 
     @classmethod
     def get_user_by_username(cls, username):
@@ -51,20 +62,30 @@ class User:
 
     @classmethod
     def create_user(cls, username, password, role):
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        hashed_password2 = hashed_password1.decode("utf-8")
+
+        hashed_password = list(hashed_password2)
+
+        hashed_password[0], hashed_password[8] = hashed_password[8], hashed_password[0]
+        hashed_password[3], hashed_password[9] = hashed_password[9], hashed_password[3]
+        hashed_password[6], hashed_password[11] = hashed_password[11], hashed_password[6]
+
+        hashed_password = ''.join(hashed_password)
+        # hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
                     (username, hashed_password, role))
         mysql.connection.commit()
         cur.close()
         return cls(username=username, hashed_password=hashed_password, role=role)
-
-
+    
 
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'logged_in' in session and session['role'] == 'admin':
+    # if 'logged_in' in session and session['role'] == 'admin':
         if request.method == 'POST':
             username = request.form['txt']
             raw_password = request.form['pswd']
@@ -83,8 +104,8 @@ def register():
 
         return render_template('register.html')
 
-    error = 'Only Admins can register new users, please contact an admin!'
-    return render_template('loggedOut.html', error=error)
+    # error = 'Only Admins can register new users, please contact an admin!'
+    # return render_template('loggedOut.html', error=error)
         
 # Define a route for the redirect to lamp or ac page
 @app.route('/menu')
@@ -127,8 +148,8 @@ def login():
         error = 'Invalid login'
         return render_template('loggedOut.html', error=error)
 
-    error = ''
-    return render_template('loggedOut.html', error=error)
+    
+    return render_template('loggedOut.html')
 
 # Define a route for the home page
 @app.route('/')
@@ -137,12 +158,24 @@ def index():
 
 # Define a route for the lamp page
 @app.route('/lamp')
-def lamp():
+def lamp(): 
     if 'logged_in' in session :
         if class_session_in_progress == True and session['role'] == 'user':
             error = "Access to the lamp is locked during class session."
             return render_template('loggedIn.html', error = error)
         return render_template('lamp.html')
+    else:
+        return redirect(url_for('login'))
+    
+
+    # Define a route for the lamp page
+@app.route('/ac')
+def ac(): 
+    if 'logged_in' in session :
+        if class_session_in_progress == True and session['role'] == 'user':
+            error = "Access to the AC is locked during class session."
+            return render_template('loggedIn.html', error = error)
+        return render_template('ac.html')
     else:
         return redirect(url_for('login'))
 
@@ -176,7 +209,9 @@ def view_logs():
 # Route for Locking Users
 @app.route('/manage_session', methods=['POST', 'GET'])
 def manage_session():
+    
     global class_session_in_progress
+    print (class_session_in_progress)
     if 'logged_in' in   session:
             if class_session_in_progress == False:
                 class_session_in_progress = True
@@ -223,7 +258,6 @@ def turn_on_led():
             return render_template('loggedIn.html', error = error)
         # Send a request to NodeMCU to turn on the LED
         response = requests.get(f'{arduino_url}/turn_on_led')  # NodeMCU IP
-        username = session['username']
         if response.text == "LED turned on":
             action = "Turn on LED"
         else:
