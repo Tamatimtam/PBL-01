@@ -38,26 +38,19 @@ class User:
         self.role = role
 
     def check_password(self, password):
-        cur = mysql.connection.cursor()
+        password1 = list(self.hashed_password)
 
-        cur.execute("SELECT password FROM login_table WHERE username = %s", (self.username,))
-        password = cur.fetchone()
-        password = password[0]
-        cur.close()
-
-        password = list(password)
-
-        if password[0] == "$" or password[3] == "$" or password[6] == "$":
-            password = ''.join(password)
-            return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+        if password1[0] == "$" or password1[3] == "$" or password1[6] == "$":
+            password1 = ''.join(password1)
+            return bcrypt.checkpw(password1.encode('utf-8'), password.encode('utf-8'))
         
-        elif password[0] != "$" or password[3] != "$" or password[6] != "$":
-            password[8], password[0] = password[0], password[8]
-            password[9], password[3] = password[3], password[9]
-            password[11], password[6] = password[6], password[11]
+        elif password1[0] != "$" or password1[3] != "$" or password1[6] != "$":
+            password1[8], password1[0] = password1[0], password1[8]
+            password1[9], password1[3] = password1[3], password1[9]
+            password1[11], password1[6] = password1[6], password1[11]
 
-            password = ''.join(password)
-            return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+            password1 = ''.join(password1)
+            return bcrypt.checkpw(password.encode('utf-8'), password1.encode('utf-8'))
 
     @classmethod
     def get_user_by_username(cls, username):
