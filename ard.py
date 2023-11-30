@@ -39,11 +39,8 @@ class User:
 
     def check_password(self, password):
         password1 = list(self.hashed_password)
-
-        # if password1[0] == "$" or password1[3] == "$" or password1[6] == "$":
-        #     password1 = ''.join(password1)
-        #     return bcrypt.checkpw(password1.encode('utf-8'), password.encode('utf-8'))
         
+        # re sort pw before hashing
         if password1[0] != "$" or password1[3] != "$" or password1[6] != "$":
             password1[8], password1[0] = password1[0], password1[8]
             password1[9], password1[3] = password1[3], password1[9]
@@ -88,7 +85,7 @@ class User:
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'logged_in' in session and session['role'] == 'admin':
+    # if 'logged_in' in session and session['role'] == 'admin':
         if request.method == 'POST':
             username = request.form['txt']
             raw_password = request.form['pswd']
@@ -107,8 +104,8 @@ def register():
 
         return render_template('register.html')
 
-    error = 'Only Admins can register new users, please contact an admin!'
-    return render_template('loggedOut.html', error=error)
+    # error = 'Only Admins can register new users, please contact an admin!'
+    # return render_template('loggedOut.html', error=error)
         
 # Define a route for the redirect to lamp or ac page
 @app.route('/menu')
@@ -167,6 +164,18 @@ def lamp():
             error = "Access to the lamp is locked during class session."
             return render_template('loggedIn.html', error = error)
         return render_template('lamp.html')
+    else:
+        return redirect(url_for('login'))
+    
+
+    # Define a route for the lamp page
+@app.route('/ac')
+def ac(): 
+    if 'logged_in' in session :
+        if class_session_in_progress == True and session['role'] == 'user':
+            error = "Access to the AC is locked during class session."
+            return render_template('loggedIn.html', error = error)
+        return render_template('ac.html')
     else:
         return redirect(url_for('login'))
 
