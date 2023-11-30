@@ -40,11 +40,11 @@ class User:
     def check_password(self, password):
         password1 = list(self.hashed_password)
 
-        if password1[0] == "$" or password1[3] == "$" or password1[6] == "$":
-            password1 = ''.join(password1)
-            return bcrypt.checkpw(password1.encode('utf-8'), password.encode('utf-8'))
+        # if password1[0] == "$" or password1[3] == "$" or password1[6] == "$":
+        #     password1 = ''.join(password1)
+        #     return bcrypt.checkpw(password1.encode('utf-8'), password.encode('utf-8'))
         
-        elif password1[0] != "$" or password1[3] != "$" or password1[6] != "$":
+        if password1[0] != "$" or password1[3] != "$" or password1[6] != "$":
             password1[8], password1[0] = password1[0], password1[8]
             password1[9], password1[3] = password1[3], password1[9]
             password1[11], password1[6] = password1[6], password1[11]
@@ -88,7 +88,7 @@ class User:
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'logged_in' in session and session['role'] == 'admin':
+    # if 'logged_in' in session and session['role'] == 'admin':
         if request.method == 'POST':
             username = request.form['txt']
             raw_password = request.form['pswd']
@@ -107,8 +107,8 @@ def register():
 
         return render_template('register.html')
 
-    error = 'Only Admins can register new users, please contact an admin!'
-    return render_template('loggedOut.html', error=error)
+    # error = 'Only Admins can register new users, please contact an admin!'
+    # return render_template('loggedOut.html', error=error)
         
 # Define a route for the redirect to lamp or ac page
 @app.route('/menu')
