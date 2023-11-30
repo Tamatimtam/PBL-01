@@ -88,16 +88,6 @@
             lampStatus.textContent = "Lampu Mati!";
             console.log("Lamp is turned off");
         }
-        fetch('/get_led_status') //gets response from server
-            .then(response => response.text()) //turns the response into text
-            .then(data => { //takes int the response and processes it to the next few lines
-                const lightStatusElement = document.getElementById('lamp-status');
-                const lightToggle = document.getElementById('lamp-toggle');
-                if (data == 'Lampu Nyala!'){
-                    lightToggle.checked = 1;}
-                else{lightToggle.checked = 0;}
-                lightStatusElement.textContent = data;
-            })
         updateLEDStatus();
     });
 
