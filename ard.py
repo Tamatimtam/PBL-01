@@ -265,7 +265,7 @@ def turn_on_led():
 
         # Insert a record into the lamp_usage_reports table
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO lamp_usage_reports (username, timestamp, action) VALUES (%s, NOW(), %s)", (username, action))
+        cur.execute("INSERT INTO lamp_usage_reports (username, timestamp, action) VALUES (%s, NOW(), %s)", (session['role'], action))
         mysql.connection.commit()
         cur.close()
     else:
