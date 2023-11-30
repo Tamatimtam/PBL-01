@@ -38,15 +38,26 @@ class User:
         self.role = role
 
     def check_password(self, password):
-        # cur = mysql.connection.cursor()
+        cur = mysql.connection.cursor()
 
-        # cur.execute("SELECT password FROM login_table WHERE username = %s", (self.username,))
-        # password2 = cur.fetchone()
-        # password2 = password2[0]
-        # password = '$'.join([password2[:0], password2[1:3], password2[3:5], password2[5:]])
+        cur.execute("SELECT password FROM login_table WHERE username = %s", (self.username,))
+        password = cur.fetchone()
+        password = password[0]
+        cur.close()
 
-        # cur.close()
-        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+        password = list(password)
+
+        if password[0] == "$" or password[3] == "$" or password[6] == "$":
+            password = ''.join(password)
+            return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
+        
+        elif password[0] != "$" or password[3] != "$" or password[6] != "$":
+            password[8], password[0] = password[0], password[8]
+            password[9], password[3] = password[3], password[9]
+            password[11], password[6] = password[6], password[11]
+
+            password = ''.join(password)
+            return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
 
     @classmethod
     def get_user_by_username(cls, username):
@@ -61,9 +72,17 @@ class User:
 
     @classmethod
     def create_user(cls, username, password, role):
-        # hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        # hashed_password = hashed_password1.decode("utf-8").replace('$', '')
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        hashed_password2 = hashed_password1.decode("utf-8")
+
+        hashed_password = list(hashed_password2)
+
+        hashed_password[0], hashed_password[8] = hashed_password[8], hashed_password[0]
+        hashed_password[3], hashed_password[9] = hashed_password[9], hashed_password[3]
+        hashed_password[6], hashed_password[11] = hashed_password[11], hashed_password[6]
+
+        hashed_password = ''.join(hashed_password)
+        # hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
@@ -71,8 +90,7 @@ class User:
         mysql.connection.commit()
         cur.close()
         return cls(username=username, hashed_password=hashed_password, role=role)
-
-
+    
 
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
