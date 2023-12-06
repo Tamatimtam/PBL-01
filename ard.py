@@ -25,7 +25,7 @@ arduino_url = "https://192.168.10.2"
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # if 'logged_in' in session and session['role'] == 'admin':
+    if 'logged_in' in session and session['role'] == 'admin':
         if request.method == 'POST':
             username = request.form['txt']
             raw_password = request.form['pswd']
@@ -44,8 +44,8 @@ def register():
 
         return render_template('register.html')
 
-    # error = 'Only Admins can register new users, please contact an admin!'
-    # return render_template('loggedOut.html', error=error)
+    error = 'Only Admins can register new users, please contact an admin!'
+    return render_template('loggedOut.html', error=error)
         
 # Define a route for the redirect to lamp or ac page
 @app.route('/menu')
