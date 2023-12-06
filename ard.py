@@ -1,97 +1,37 @@
 # Import necessary libraries
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_mysqldb import MySQL
 import requests
 import bcrypt
 import os
 from requests.exceptions import ConnectionError
+from models import User, db, Logs
 
 # Create a Flask application
 app = Flask(__name__)
 
-# Configure MySQL connection
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'user'
+# Configure SQLite connection
 
-
-arduino_url = 'http://192.168.43.105'
-
-# Initialize MySQL
-mysql = MySQL(app)
-
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db.init_app(app)  # assuming 'app' is your Flask app
 
 # Secret key for session management
 app.secret_key = os.urandom(24)
 
 # Fitur buat locking
-class_session_in_progress = False
+class_session_in_progress = False    
 
-
-#CLASS USER
-# User classSSS
-class User:
-    def __init__(self, username, hashed_password, role):
-        self.username = username
-        self.hashed_password = hashed_password
-        self.role = role
-
-    def check_password(self, password):
-        password1 = list(self.hashed_password)
-        
-        # re sort pw before hashing
-        if password1[0] != "$" or password1[3] != "$" or password1[6] != "$":
-            password1[8], password1[0] = password1[0], password1[8]
-            password1[9], password1[3] = password1[3], password1[9]
-            password1[11], password1[6] = password1[6], password1[11]
-
-            password1 = ''.join(password1)
-            return bcrypt.checkpw(password.encode('utf-8'), password1.encode('utf-8'))
-
-    @classmethod
-    def get_user_by_username(cls, username):
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM login_table WHERE username = %s", (username,))
-        user_data = cur.fetchone()
-        cur.close()
-
-        if user_data:
-            return cls(username=user_data[1], hashed_password=user_data[2], role=user_data[3])
-        return None
-
-    @classmethod
-    def create_user(cls, username, password, role):
-        hashed_password1 = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        hashed_password2 = hashed_password1.decode("utf-8")
-
-        hashed_password = list(hashed_password2)
-
-        hashed_password[0], hashed_password[8] = hashed_password[8], hashed_password[0]
-        hashed_password[3], hashed_password[9] = hashed_password[9], hashed_password[3]
-        hashed_password[6], hashed_password[11] = hashed_password[11], hashed_password[6]
-
-        hashed_password = ''.join(hashed_password)
-        # hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO login_table (username, password, role) VALUES (%s, %s, %s)",
-                    (username, hashed_password, role))
-        mysql.connection.commit()
-        cur.close()
-        return cls(username=username, hashed_password=hashed_password, role=role)
-    
+arduino_url = "https://192.168.10.2"
 
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'logged_in' in session and session['role'] == 'admin':
+    # if 'logged_in' in session and session['role'] == 'admin':
         if request.method == 'POST':
             username = request.form['txt']
             raw_password = request.form['pswd']
             role = request.form['userType']
 
-            existing_user = User.get_user_by_username(username)
+            existing_user = User.query.filter_by(username=username).first()
 
             if existing_user:
                 error = 'Username already exists'
@@ -104,8 +44,8 @@ def register():
 
         return render_template('register.html')
 
-    error = 'Only Admins can register new users, please contact an admin!'
-    return render_template('loggedOut.html', error=error)
+    # error = 'Only Admins can register new users, please contact an admin!'
+    # return render_template('loggedOut.html', error=error)
         
 # Define a route for the redirect to lamp or ac page
 @app.route('/menu')
@@ -122,10 +62,9 @@ def menu_admin():
     if 'logged_in' in session and session['role'] == 'admin':
         name = session['username']
         state = class_session_in_progress
-        return render_template('loggedInAdmin.html', name=name, state = state)
+        return render_template('loggedInAdmin.html', name=name, state=state)
     error = 'Please log in!'
-    return render_template('loggedOut.html', error =error)
-
+    return render_template('loggedOut.html', error=error)
 
 # Define a route for the login page
 @app.route('/login', methods=['GET', 'POST'])
@@ -134,7 +73,7 @@ def login():
         username = request.form['txt']
         password = request.form['pswd']
 
-        user = User.get_user_by_username(username)
+        user = User.query.filter_by(username=username).first()
 
         if user and user.check_password(password):
             session['logged_in'] = True
@@ -148,7 +87,6 @@ def login():
         error = 'Invalid login'
         return render_template('loggedOut.html', error=error)
 
-    
     return render_template('loggedOut.html')
 
 # Define a route for the home page
@@ -159,22 +97,21 @@ def index():
 # Define a route for the lamp page
 @app.route('/lamp')
 def lamp(): 
-    if 'logged_in' in session :
-        if class_session_in_progress == True and session['role'] == 'user':
+    if 'logged_in' in session:
+        if class_session_in_progress and session['role'] == 'user':
             error = "Access to the lamp is locked during class session."
-            return render_template('loggedIn.html', error = error)
+            return render_template('loggedIn.html', error=error)
         return render_template('lamp.html')
     else:
         return redirect(url_for('login'))
-    
 
-    # Define a route for the lamp page
+# Define a route for the AC page
 @app.route('/ac')
 def ac(): 
-    if 'logged_in' in session :
-        if class_session_in_progress == True and session['role'] == 'user':
+    if 'logged_in' in session:
+        if class_session_in_progress and session['role'] == 'user':
             error = "Access to the AC is locked during class session."
-            return render_template('loggedIn.html', error = error)
+            return render_template('loggedIn.html', error=error)
         return render_template('ac.html')
     else:
         return redirect(url_for('login'))
@@ -182,19 +119,15 @@ def ac():
 # Define a route for the logs page
 @app.route('/logs', methods=['GET', 'POST'])
 def view_logs():
-#    if 'logged_in' in session:
-        cur = mysql.connection.cursor()
-
-        cur.execute("SELECT username, timestamp, action FROM lamp_usage_reports")
-        logs = cur.fetchall()
-        cur.close()
+    if 'logged_in' in session and session['role'] == 'admin':
+        logs = Logs.query.all()
 
         logs_with_details = []
 
         for log in logs:
-            username = log[0]
-            timestamp = log[1]
-            action = log[2]
+            username = log.username
+            timestamp = log.timestamp
+            action = log.action
 
             logs_with_details.append({
                 'username': username,
@@ -203,25 +136,23 @@ def view_logs():
             })
 
         return render_template('logs.html', logs=logs_with_details)
-    #else:
-     #   return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
 
 # Route for Locking Users
 @app.route('/manage_session', methods=['POST', 'GET'])
 def manage_session():
-    
     global class_session_in_progress
-    print (class_session_in_progress)
-    if 'logged_in' in   session:
-            if class_session_in_progress == False:
-                class_session_in_progress = True
-                return "session was false now true"
-            else :
-                class_session_in_progress = False
-                return "session was true now false"
+    print(class_session_in_progress)
+    if 'logged_in' in session:
+        if class_session_in_progress:
+            class_session_in_progress = False
+            return "session was true now false"
+        else:
+            class_session_in_progress = True
+            return "session was false now true"
     else:
         return redirect(url_for('login'))
-
 
 # Define a route to log out
 @app.route('/logout')
@@ -240,7 +171,7 @@ def get_led_status():
         led_status = response_status.text
         if led_status == 'On':
             led_info = 'Lampu Nyala!'
-        elif led_status == 'Off' :
+        elif led_status == 'Off':
             led_info = 'Lampu Mati!'
         else:
             led_info = f'ERROR!, {led_status}'
@@ -252,10 +183,10 @@ def get_led_status():
 @app.route('/turn_on_led', methods=['POST', 'GET'])
 def turn_on_led():
     # Check if the user is logged in
-    if 'logged_in' in session :
+    if 'logged_in' in session:
         if class_session_in_progress:
             error = "Access to the lamp is locked during class session."
-            return render_template('loggedIn.html', error = error)
+            return render_template('loggedIn.html', error=error)
         # Send a request to NodeMCU to turn on the LED
         response = requests.get(f'{arduino_url}/turn_on_led')  # NodeMCU IP
         if response.text == "LED turned on":
@@ -263,18 +194,16 @@ def turn_on_led():
         else:
             action = "Turn off LED"
 
-        # Insert a record into the lamp_usage_reports table
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO lamp_usage_reports (username, timestamp, action) VALUES (%s, NOW(), %s)", (session['username'], action))
-        mysql.connection.commit()
-        cur.close()
+        # Insert a record into the Logs table
+        log = Logs(username=session['username'], action=action)
+        db.session.add(log)
+        db.session.commit()
         return action
     else:
         return redirect(url_for('login'))
-
-
-
-
+    
 # Run the Flask application
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
