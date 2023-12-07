@@ -20,7 +20,7 @@ app.secret_key = os.urandom(24)
 # Fitur buat locking
 class_session_in_progress = False    
 
-arduino_url = "https://192.168.10.2"
+arduino_url = "http://192.168.137.80"
 
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
