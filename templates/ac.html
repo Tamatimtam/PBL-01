@@ -27,9 +27,9 @@
     
     <div class="temperature-box">
         <div class="temperature-control">
-            <button id="decrease-temp">-</button>
+            <button class="ac-button" id="decrease-temp">-</button>
             <span id="temperature">22°C</span>
-            <button id="increase-temp">+</button>
+            <button class="acbutton" id="increase-temp">+</button>
         </div>
     </div>
 </div>
@@ -49,7 +49,11 @@
         border-radius: 20px;
         margin: 20px 30px;
         padding: 20px;
+        display: flex;
+        justify-content: center;
     }
+
+    .ac
 
     /* Styles for centering the toggle and "AC ON" or "AC OFF" text */
     .ac-control {
@@ -102,7 +106,7 @@
 
     // Event listener for decreasing temperature
     decreaseTempButton.addEventListener("click", () => {
-        if (temperature > 16) {
+        if (temperature > 18) {
             temperature--;
             updateTemperature();
         }
@@ -110,7 +114,7 @@
 
     // Event listener for increasing temperature
     increaseTempButton.addEventListener("click", () => {
-        if (temperature < 30) {
+        if (temperature < 25) {
             temperature++;
             updateTemperature();
         }

@@ -216,6 +216,7 @@ button:hover {
     cursor: pointer;
     margin: 0 10px;
     transition: background 0.2s ease-in;
+    display: block;
 }
 
 #decrease-temp:hover,
