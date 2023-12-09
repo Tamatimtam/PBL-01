@@ -5,7 +5,36 @@
         "**/.hg": true,
         "**/CVS": true,
         "**/.DS_Store": true,
-        "**/Thumbs.db": true
+        "**/Thumbs.db": true,
+        ".Linux": true,
+        ".RUN": true,
+        ".TAMA": true,
+        ".venv": true,
+        ".venv/Lib": true,
+        ".venv/Scripts": true,
+        ".venv/pyvenv.cfg": true,
+        ".vscode": true,
+        "arduino": true,
+        "CHRIS": true,
+        "instance": true,
+        "old templates": true,
+        "old-frontend": true,
+        "secret'=": true
     },
-    "hide-files.files": []
+    "hide-files.files": [
+        ".Linux",
+        ".RUN",
+        ".TAMA",
+        ".venv",
+        ".venv/Lib",
+        ".venv/Scripts",
+        ".venv/pyvenv.cfg",
+        ".vscode",
+        "arduino",
+        "CHRIS",
+        "instance",
+        "old templates",
+        "old-frontend",
+        "secret'="
+    ]
 }
