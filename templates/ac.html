@@ -2,13 +2,15 @@
 <html>
 <head>
     <title>AC Control</title>
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='LoggedIn.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='loggedIn.css')}}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
     <meta name="view-transition"    content="same-origin"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 </head>
 <body>
 <div class="main">  
+    <a href="#" class="back-button" id="backButton">&larr; Back</a>
+
     <input type="checkbox" id="chk" aria-hidden="true">
     
     <div class="ac-control">
@@ -19,16 +21,16 @@
         <div class="toggle-control">
             <label class="switch">
                 <input type="checkbox" id="ac-toggle">
-                <span class="slider round"></span>
+                <span style="width: 60px;" class="slider round"></span>
             </label>
-            <span id="ac-status">AC OFF</span>
+            <span id="ac-status">Requesting AC Status...  </span>
         </div>
     </div>
     
     <div class="temperature-box">
         <div class="temperature-control">
             <button class="ac-button" id="decrease-temp">-</button>
-            <span id="temperature">22°C</span>
+            <span id="temperature">...</span>
             <button class="acbutton" id="increase-temp">+</button>
         </div>
     </div>
@@ -52,8 +54,6 @@
         display: flex;
         justify-content: center;
     }
-
-    .ac
 
     /* Styles for centering the toggle and "AC ON" or "AC OFF" text */
     .ac-control {
@@ -89,6 +89,10 @@
     }
 </style>
 
+
+</body>
+
+
 <script>
     const temperatureLabel = document.getElementById("temperature");
     const decreaseTempButton = document.getElementById("decrease-temp");
@@ -97,45 +101,135 @@
     const acToggle = document.getElementById("ac-toggle");
     const acStatus = document.getElementById("ac-status");
 
-    let temperature = 22;
+    let temperature = 25;
+    let acButtonEnabled = true; // Flag to track if the AC toggle button is enabled
+    let buttonCooldown = false; // Flag to track if the temperature buttons are in cooldown
+
+    //Update LED Status Function
+    function updateAC() {
+        fetch('/UpdateAC') //gets response from server
+            .then(response => response.text()) //turns the response into text
+            .then(data => { //takes int the response and processes it to the next few lines
+                const ACStatusElement = document.getElementById('ac-status');
+                const lightToggle = document.getElementById('ac-toggle');
+                ACStatusElement.textContent = data;
+                lightToggle.checked = data === 'AC ON'; // Set the checkbox status
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
 
     // Function to update the temperature label
     function updateTemperature() {
-        temperatureLabel.textContent = temperature + "°C";
+        fetch('/UpdateTemp') //gets response from server                                  //GET THE ROUTE FOR UPDATE AC TEMP ON FLASK
+            .then(response => response.text()) //turns the response into text
+            .then(data => { //takes int the response and processes it to the next few lines
+                const ACTempElement = document.getElementById('temperature');
+                ACTempElement.textContent = data + "°C";
+                temperature = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
     }
 
     // Event listener for decreasing temperature
-    decreaseTempButton.addEventListener("click", () => {
-        if (temperature > 18) {
-            temperature--;
-            updateTemperature();
-        }
-    });
+decreaseTempButton.addEventListener("click", () => {
+    if (!buttonCooldown && temperature > 18) {
+        buttonCooldown = true; // Set cooldown flag
+        setTimeout(() => { buttonCooldown = false; }, 1000); // Reset cooldown after 1000ms
 
-    // Event listener for increasing temperature
-    increaseTempButton.addEventListener("click", () => {
-        if (temperature < 30) {
-            temperature++;
-            updateTemperature();
-        }
-    });
+        temperature++;
+        const ACTempElement = document.getElementById('temperature');
+        fetch('/ACDown')
+        updateTemperature();
+    } else {
+        // Optionally: Provide some user feedback that the button is in cooldown
+        console.log("Button in cooldown, please wait.");
+    }
+});
 
+// Event listener for increasing temperature
+increaseTempButton.addEventListener("click", () => {
+    if (!buttonCooldown && temperature < 30) {
+        buttonCooldown = true; // Set cooldown flag
+        setTimeout(() => { buttonCooldown = false; }, 1000); // Reset cooldown after 1000ms
+
+        temperature++;
+        const ACTempElement = document.getElementById('temperature');
+        fetch('/ACUp')
+        updateTemperature();
+    } else {
+        // Optionally: Provide some user feedback that the button is in cooldown
+        console.log("Button in cooldown, please wait.");
+    }
+});
+
+    
+
+    //Enable button again after cooldown
+    function enableACButton() {
+        acButtonEnabled = true;
+        acToggle.disabled = false; // Re-enable the AC toggle button
+    }   
     // Event listener for toggling AC on and off
     acToggle.addEventListener("change", () => {
-        if (acToggle.checked) {
-            // AC is turned on
-            acStatus.textContent = "AC ON";
-            acStatus.classList.remove("off");
-            acStatus.classList.add("on");
-            console.log("AC is turned on");
+        if (acButtonEnabled) {
+            // AC button is enabled, proceed with the action
+            acButtonEnabled = false; // Disable the button
+            acToggle.disabled = true; // Disable the AC toggle button during cooldown
+            setTimeout(enableACButton, 5000); // Enable the button after 5 seconds
+
+            fetch('/ToggleAC')
+                .then(response => response.text())
+                .then(data => {
+                    if (acToggle.checked) {
+                        // AC is turned on
+                        acStatus.textContent = "AC ON";
+                        console.log("AC is turned on");
+                    } else {
+                        // AC is turned off
+                        acStatus.textContent = "AC OFF";
+                        console.log("AC is turned off");
+                    }
+                    updateAC();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         } else {
-            // AC is turned off
-            acStatus.textContent = "AC OFF";
-            acStatus.classList.remove("on");
-            acStatus.classList.add("off");
-            console.log("AC is turned off");
+            // Display alert notification about the cooldown
+            alert("Please wait 5 seconds between AC toggle actions.");
         }
     });
+
+
+
+
+
+    
+updateAC();
+updateTemperature();
 </script>
-</body>
+
+
+
+
+    <!-- Back Button JS -->
+    <script>
+        // Add this script to handle the back button click
+document.getElementById('backButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    history.back(); // Go back to the previous page in the browser history
+});
+</script>
+
+
 </html>
+
+
+
+
+

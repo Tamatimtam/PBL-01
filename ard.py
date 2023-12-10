@@ -10,7 +10,6 @@ from models import User, db, Logs
 app = Flask(__name__)
 
 # Configure SQLite connection
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db.init_app(app)  # assuming 'app' is your Flask app
 
@@ -20,8 +19,14 @@ app.secret_key = os.urandom(24)
 # Fitur buat locking
 class_session_in_progress = False    
 
-arduino_url = "http://192.168.137.80"
+arduino_url = "http://192.168.87.6"
 
+
+
+
+
+
+# region  LOGIN / LOGOUT / REGISTER
 # Define a route for the registration page (only accessible to admins)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -45,25 +50,6 @@ def register():
         return render_template('register.html')
 
     error = 'Only Admins can register new users, please contact an admin!'
-    return render_template('loggedOut.html', error=error)
-        
-# Define a route for the redirect to lamp or ac page
-@app.route('/menu')
-def menu():
-    if 'logged_in' in session:
-        name = session['username']
-        return render_template('loggedIn.html', name=name)
-    error = 'Please log in!'
-    return render_template('loggedOut.html', error=error)
-
-# Define a route for the redirect to lamp or ac page ADMIN VERSION
-@app.route('/menu_admin')
-def menu_admin():
-    if 'logged_in' in session and session['role'] == 'admin':
-        name = session['username']
-        state = class_session_in_progress
-        return render_template('loggedInAdmin.html', name=name, state=state)
-    error = 'Please log in!'
     return render_template('loggedOut.html', error=error)
 
 # Define a route for the login page
@@ -89,10 +75,58 @@ def login():
 
     return render_template('loggedOut.html')
 
+
+# Define a route to log out
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    session.pop('username', None)
+    session.pop('role', None)
+    return redirect(url_for('login'))
+
+# endregion
+
+
+        
+
+
+
+
+
+
+
+# region MENU AND RENDER MENU
 # Define a route for the home page
 @app.route('/')
 def index():
     return render_template('loggedOut.html')
+
+
+
+
+
+# Define a route for the redirect to lamp or ac page
+@app.route('/menu')
+def menu():
+    if 'logged_in' in session:
+        name = session['username']
+        return render_template('loggedIn.html', name=name)
+    error = 'Please log in!'
+    return render_template('loggedOut.html', error=error)
+
+# Define a route for the redirect to lamp or ac page ADMIN VERSION
+@app.route('/menu_admin')
+def menu_admin():
+    if 'logged_in' in session and session['role'] == 'admin':
+        name = session['username']
+        state = class_session_in_progress
+        return render_template('loggedInAdmin.html', name=name, state=state)
+    error = 'Please log in!'
+    return render_template('loggedOut.html', error=error)
+
+
+
+
 
 # Define a route for the lamp page
 @app.route('/lamp')
@@ -115,6 +149,10 @@ def ac():
         return render_template('ac.html')
     else:
         return redirect(url_for('login'))
+
+
+
+
 
 # Define a route for the logs page
 @app.route('/logs', methods=['GET', 'POST'])
@@ -139,6 +177,10 @@ def view_logs():
     else:
         return redirect(url_for('login'))
 
+
+
+
+
 # Route for Locking Users
 @app.route('/manage_session', methods=['POST', 'GET'])
 def manage_session():
@@ -153,15 +195,14 @@ def manage_session():
             return "session was false now true"
     else:
         return redirect(url_for('login'))
+# endregion
 
-# Define a route to log out
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    session.pop('username', None)
-    session.pop('role', None)
-    return redirect(url_for('login'))
 
+
+
+
+
+# region LAMP FUNCTIONS
 # Define route for LED Status
 @app.route('/get_led_status', methods=['GET'])
 def get_led_status():
@@ -178,8 +219,8 @@ def get_led_status():
         return led_info
     except ConnectionError as e:
         return 'unknown'  # Handle connection errors
-
-# Define a route to turn on the LED
+    
+    # Define a route to turn on the LED
 @app.route('/turn_on_led', methods=['POST', 'GET'])
 def turn_on_led():
     # Check if the user is logged in
@@ -201,7 +242,119 @@ def turn_on_led():
         return action
     else:
         return redirect(url_for('login'))
+# endregion
+
+
+
+
+
+
+
+
+# region AC Functions
+    # Define route for AC Update (POWER)
+@app.route('/UpdateAC', methods=['GET'])
+def UpdateAC():
+    try:
+        response_status = requests.get(f'{arduino_url}/get_AC_status')
+        response_status.raise_for_status()  # Raise an exception for HTTP errors
+        AC_status = response_status.text
+        if AC_status == 'On':
+            AC_info = 'AC ON'
+        elif AC_status == 'Off':
+            AC_info = 'AC OFF'
+        else:
+            AC_info = f'ERROR!, {AC_status}'
+        return AC_info
+    except ConnectionError as e:
+        return 'unknown'  # Handle connection errors
+
+            # Define route for AC Update (TEMPERATURE)
+@app.route('/UpdateTemp', methods=['GET'])
+def UpdateTemp():
+    try:
+        response_status = requests.get(f'{arduino_url}/get_AC_temp')
+        response_status.raise_for_status()  # Raise an exception for HTTP errors
+        AC_status = response_status.text
+        if AC_status:
+            AC_info = AC_status
+        else:
+            AC_info = f'ERROR!, {AC_status}'
+        return AC_info
+    except ConnectionError as e:
+        return 'unknown'  # Handle connection errors
+
+    # Define a route to Toggle the AC
+@app.route('/ToggleAC', methods=['POST', 'GET'])
+def ToggelAC():
+    # Check if the user is logged in
+    if 'logged_in' in session:
+        if class_session_in_progress:
+            error = "Access to the AC is locked during class session."
+            return render_template('loggedIn.html', error=error)
+        # Send a request to NodeMCU to turn on the LED
+        response = requests.get(f'{arduino_url}/acControl')  # NodeMCU IP
+        if response.text == "AC Is ON!":
+            action = "AC ON"
+        else:
+            action = "AC OFF"
+
+        # Insert a record into the Logs table
+        log = Logs(username=session['username'], action=action)
+        db.session.add(log)
+        db.session.commit()
+        return action
+    else:
+        return redirect(url_for('login'))
+    # endregion
+
+
+    # Define a route to add temp
+@app.route('/ACUp', methods=['POST', 'GET'])
+def ACUp():
+    # Check if the user is logged in
+    if 'logged_in' in session:
+        if class_session_in_progress:
+            error = "Access to the AC is locked during class session."
+            return render_template('loggedIn.html', error=error)
+        # Send a request to NodeMCU to turn on the LED
+        response = requests.get(f'{arduino_url}/ACUp')  # NodeMCU IP
+        action = "raised temp to " + response.text
+
+        # Insert a record into the Logs table
+        log = Logs(username=session['username'], action=action)
+        db.session.add(log)
+        db.session.commit()
+        return action
+    else:
+        return redirect(url_for('login'))
+    # endregion
     
+     # Define a route to lower temp
+@app.route('/ACDown', methods=['POST', 'GET'])
+def ACDown():
+    # Check if the user is logged in
+    if 'logged_in' in session:
+        if class_session_in_progress:
+            error = "Access to the AC is locked during class session."
+            return render_template('loggedIn.html', error=error)
+        # Send a request to NodeMCU to turn on the LED
+        response = requests.get(f'{arduino_url}/ACDown')  # NodeMCU IP
+        action = "lowered temp to " + response.text
+
+        # Insert a record into the Logs table
+        log = Logs(username=session['username'], action=action)
+        db.session.add(log)
+        db.session.commit()
+        return action
+    else:
+        return redirect(url_for('login'))
+    # endregion
+
+
+
+
+
 # Run the Flask application
 if __name__ == '__main__':
     with app.app_context():

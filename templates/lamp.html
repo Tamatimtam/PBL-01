@@ -7,7 +7,12 @@
     <meta name="view-transition"    content="same-origin"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 </head>
+
+
 <body>
+
+
+
 <div class="main">  
     <a href="#" class="back-button" id="backButton">&larr; Back</a>
 
@@ -21,12 +26,14 @@
         <div class="toggle-control">
             <label class="switch">
                 <input type="checkbox" id="lamp-toggle">
-                <span class="slider round"></span>
+                <span style="width: 60px;" class="slider round"></span>
             </label>
-            <span id="lamp-status">Lamp OFF</span>
+            <span id="lamp-status">Requesting Lamp Status...</span>
         </div>
     </div>
 </div>
+
+
 
 <style>
     /* Styles for the toggle box */
@@ -55,14 +62,6 @@
         margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
     }
 
-    .toggle-control #lamp-status.on {
-        color: green; /* Green color for "Lamp ON" */
-    }
-
-    .toggle-control #lamp-status.off {
-        color: red; /* Red color for "Lamp OFF" */
-    }
-
     .toggle-control {
         display: flex;
         align-items: center;
@@ -70,6 +69,7 @@
     }
 </style>
 
+    <!-- Back Button JS -->
 <script>
         // Add this script to handle the back button click
 document.getElementById('backButton').addEventListener('click', function(event) {
@@ -78,13 +78,21 @@ document.getElementById('backButton').addEventListener('click', function(event) 
 });
 </script>
 
+
+<!-- //Main JS -->
 <script>
+    //Define Const
     const lampToggle = document.getElementById("lamp-toggle");
     const lampStatus = document.getElementById("lamp-status");
 
+
+
+    //Toggle Light Function
     function toggleLight() { //define toggle light
         fetch('/turn_on_led') //fetch the turn on led route
     }
+
+
 
     // Event listener for toggling Lamp on and off
     lampToggle.addEventListener("change", () => {
@@ -101,6 +109,10 @@ document.getElementById('backButton').addEventListener('click', function(event) 
         updateLEDStatus();
     });
 
+
+
+
+    //Update LED Status Function
     function updateLEDStatus() {
         fetch('/get_led_status') //gets response from server
             .then(response => response.text()) //turns the response into text
@@ -115,13 +127,11 @@ document.getElementById('backButton').addEventListener('click', function(event) 
             });
     }
 
+
+    //Initial UpdateLEDStatus on page load
     updateLEDStatus();
-
-
-
-
-
-    
 </script>
+
+
 </body>
 </html>
