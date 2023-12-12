@@ -55,9 +55,9 @@ class User(db.Model):
 
         hashed_password = list(hashed_password2)
 
-        hashed_password[0], hashed_password[8] = hashed_password[8], hashed_password[0]
-        hashed_password[3], hashed_password[9] = hashed_password[9], hashed_password[3]
-        hashed_password[6], hashed_password[11] = hashed_password[11], hashed_password[6]
+        indices_to_swap = [(0, 8), (3, 9), (6, 11), (1, 19), (2, 18), (4, 22), (5, 29)]
+        for i, j in indices_to_swap:
+            hashed_password[i], hashed_password[j] = hashed_password[j], hashed_password[i]
 
         hashed_password = ''.join(hashed_password)
 
