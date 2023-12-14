@@ -1,5 +1,6 @@
 # Import necessary libraries
 from flask import Flask, render_template, request, session, redirect, url_for
+from flask_socketio import SocketIO, emit
 import requests
 import bcrypt
 import os
@@ -9,9 +10,19 @@ from models import User, db, Logs
 # Create a Flask application
 app = Flask(__name__)
 
-# Configure SQLite connection
+# Configure SQLite connection and SocketIO
+socketio = SocketIO(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db.init_app(app)  # assuming 'app' is your Flask app
+
+#SocketIO
+
+  #Function for LED updated
+@socketio.on('update_led_status')
+def handle_update_led_status(data):
+    status = data['status']
+    # Use status information to update the HTML dynamically on the client side
+    print(f'LED status updated: {status}')
 
 # Secret key for session management
 app.secret_key = os.urandom(24)
@@ -228,12 +239,16 @@ def turn_on_led():
         if class_session_in_progress:
             error = "Access to the lamp is locked during class session."
             return render_template('loggedIn.html', error=error)
+        
+
         # Send a request to NodeMCU to turn on the LED
         response = requests.get(f'{arduino_url}/turn_on_led')  # NodeMCU IP
         if response.text == "LED turned on":
             action = "Turn on LED"
+            socketio.emit('update_led_status', {'status': 'Lampu Nyala!'})
         else:
             action = "Turn off LED"
+            socketio.emit('update_led_status', {'status': 'Lampu Mati!'})
 
         # Insert a record into the Logs table
         log = Logs(username=session['username'], action=action)
@@ -306,7 +321,6 @@ def ToggelAC():
         return action
     else:
         return redirect(url_for('login'))
-    # endregion
 
 
     # Define a route to add temp
@@ -328,7 +342,6 @@ def ACUp():
         return action
     else:
         return redirect(url_for('login'))
-    # endregion
     
      # Define a route to lower temp
 @app.route('/ACDown', methods=['POST', 'GET'])
@@ -349,7 +362,7 @@ def ACDown():
         return action
     else:
         return redirect(url_for('login'))
-    # endregion
+# endregion
 
 
 
@@ -359,4 +372,5 @@ def ACDown():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    socketio.run(app, debug=True)
+

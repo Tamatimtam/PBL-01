@@ -4,6 +4,7 @@
 #include <IRremoteESP8266.h>
 #include <IRac.h>
 #include <IRutils.h>
+#include <ir_Panasonic.h>
 
 const uint16_t kIrLed = D5; //GPIO Pin
 const int relay_pin = D2; //LED RELAY PIN
@@ -66,8 +67,22 @@ void ACTurnOn() {
   ac.next.degrees = userTemperature;
 
   // Toggle A/C state
-  ac.next.power = !acState; //library variable
   acState = !acState;       //Local Variable
+  ac.next.power = acState; //library variable
+  
+  
+  // Send Data to AC via IR
+    ac.sendAc();
+    server.send(200, "text/html", acState ? "AC Is ON!" : "AC Is OFF!");
+}
+
+
+void test() {
+  // Set temperature based on user input
+  ac.next.degrees = userTemperature;
+
+  // Toggle A/C state
+  ac.next.power = true; //library variable
   
   // Send Data to AC via IR
     ac.sendAc();

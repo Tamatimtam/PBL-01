@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Lamp Control</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='loggedIn.css')}}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
-    <meta name="view-transition"    content="same-origin"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+    <meta name="view-transition" content="same-origin"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
-
 
 <body>
 
-
-
-<div class="main">  
+<div class="main">
     <a href="#" class="back-button" id="backButton">&larr; Back</a>
 
     <input type="checkbox" id="chk" aria-hidden="true">
-    
+
     <div class="lamp-control">
         <label for="chk" aria-hidden="true">Lamp Control</label>
     </div>
-    
+
     <div class="toggle-box">
         <div class="toggle-control">
             <label class="switch">
@@ -32,8 +31,6 @@
         </div>
     </div>
 </div>
-
-
 
 <style>
     /* Styles for the toggle box */
@@ -69,34 +66,48 @@
     }
 </style>
 
-    <!-- Back Button JS -->
+<!-- Back Button JS -->
 <script>
-        // Add this script to handle the back button click
-document.getElementById('backButton').addEventListener('click', function(event) {
-    event.preventDefault();
-    history.back(); // Go back to the previous page in the browser history
-});
+    document.getElementById('backButton').addEventListener('click', function(event) {
+        event.preventDefault();
+        history.back(); // Go back to the previous page in the browser history
+    });
 </script>
 
-
-<!-- //Main JS -->
+<!-- Main JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <script>
-    //Define Const
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('update_led_status', function(data) {
+        var status = data.status;
+        var lampStatusElement = document.getElementById('lamp-status');
+        var lampToggle = document.getElementById('lamp-toggle');
+        lampStatusElement.textContent = status;
+        lampToggle.checked = status === 'Lampu Nyala!';
+    });
+
+    // Define Const
     const lampToggle = document.getElementById("lamp-toggle");
     const lampStatus = document.getElementById("lamp-status");
 
-
-
-    //Toggle Light Function
-    function toggleLight() { //define toggle light
-        fetch('/turn_on_led') //fetch the turn on led route
+    // Toggle Light Function
+    function toggleLight() {
+        fetch('/turn_on_led')
+            .then(response => response.text())
+                .then(data => {
+                    updateLEDStatus();
+                    // Emit WebSocket event when LED status changes
+                    socket.emit('update_led_status', { status: data });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
     }
-
-
 
     // Event listener for toggling Lamp on and off
     lampToggle.addEventListener("change", () => {
-        toggleLight()
+        toggleLight();
         if (lampToggle.checked) {
             // Lamp is turned on
             lampStatus.textContent = "Lampu Nyala!";
@@ -109,29 +120,24 @@ document.getElementById('backButton').addEventListener('click', function(event) 
         updateLEDStatus();
     });
 
-
-
-
-    //Update LED Status Function
+    // Update LED Status Function
     function updateLEDStatus() {
-        fetch('/get_led_status') //gets response from server
-            .then(response => response.text()) //turns the response into text
-            .then(data => { //takes int the response and processes it to the next few lines
+        fetch('/get_led_status')
+            .then(response => response.text())
+            .then(data => {
                 const lightStatusElement = document.getElementById('lamp-status');
                 const lightToggle = document.getElementById('lamp-toggle');
                 lightStatusElement.textContent = data;
-                lightToggle.checked = data === 'Lampu Nyala!'; // Set the checkbox status
+                lightToggle.checked = data === 'Lampu Nyala!';
             })
             .catch(error => {
                 console.error('Error:', error);
             });
     }
 
-
-    //Initial UpdateLEDStatus on page load
+    // Initial UpdateLEDStatus on page load
     updateLEDStatus();
 </script>
-
 
 </body>
 </html>
