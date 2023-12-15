@@ -1,36 +1,57 @@
-# Import necessary libraries
+# region  SETUP / HEADER 
+
+
+### Import necessary libraries
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 import requests
 import bcrypt
 import os
 from requests.exceptions import ConnectionError
 from models import User, db, Logs
 
-# Create a Flask application
+###Create a Flask application
 app = Flask(__name__)
 
-# Configure SQLite connection and SocketIO
-socketio = SocketIO(app)
+
+
+
+
+### Configure SQLite connection and SocketIO
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db.init_app(app)  # assuming 'app' is your Flask app
 
-#SocketIO
 
+
+
+
+###SocketIO
+socketio = SocketIO(app)
   #Function for LED updated
+
+  #DEBUGGING, add a log statement when an emit event happens
 @socketio.on('update_led_status')
 def handle_update_led_status(data):
     status = data['status']
     # Use status information to update the HTML dynamically on the client side
     print(f'LED status updated: {status}')
 
-# Secret key for session management
-app.secret_key = os.urandom(24)
 
-# Fitur buat locking
-class_session_in_progress = False    
 
-arduino_url = "http://192.168.87.6"
+
+
+
+
+### Secret key for session management
+app.secret_key = os.urandom(24) 
+
+
+
+###Local Variables
+
+class_session_in_progress = False       # Variable buat locking 
+arduino_url = "http://192.168.87.6"     # Variable buat arduino URL
+# endregion
 
 
 
@@ -106,7 +127,7 @@ def logout():
 
 
 
-# region MENU AND RENDER MENU
+# region INDEX, MENU AND RENDER MENU
 # Define a route for the home page
 @app.route('/')
 def index():
