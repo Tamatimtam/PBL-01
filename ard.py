@@ -87,10 +87,6 @@ def logout():
 # endregion
 
 
-        
-
-
-
 
 
 
@@ -100,8 +96,6 @@ def logout():
 @app.route('/')
 def index():
     return render_template('loggedOut.html')
-
-
 
 
 
@@ -126,8 +120,6 @@ def menu_admin():
 
 
 
-
-
 # Define a route for the lamp page
 @app.route('/lamp')
 def lamp(): 
@@ -149,8 +141,6 @@ def ac():
         return render_template('ac.html')
     else:
         return redirect(url_for('login'))
-
-
 
 
 
@@ -179,8 +169,6 @@ def view_logs():
 
 
 
-
-
 # Route for Locking Users
 @app.route('/manage_session', methods=['POST', 'GET'])
 def manage_session():
@@ -196,8 +184,6 @@ def manage_session():
     else:
         return redirect(url_for('login'))
 # endregion
-
-
 
 
 
@@ -243,10 +229,6 @@ def turn_on_led():
     else:
         return redirect(url_for('login'))
 # endregion
-
-
-
-
 
 
 
@@ -353,10 +335,9 @@ def ACDown():
 
 
 
-
-
 # Run the Flask application
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True, ssl_context=('C:/laragon/etc/ssl/laragon.crt', 'C:/laragon/etc/ssl/laragon.key'))
+    app.run(debug=True, ssl_context=('ssl-certificate/laragon.crt', 'ssl-certificate/laragon.key'))
+# C:/laragon/etc/ssl/laragon.crt C:/laragon/etc/ssl/laragon.key
