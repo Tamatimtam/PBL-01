@@ -16,12 +16,33 @@ class User(db.Model):
         
         # re sort pw before hashing
         if password1[0] != "$" or password1[3] != "$" or password1[6] != "$":
-            password1[8], password1[0] = password1[0], password1[8]
-            password1[9], password1[3] = password1[3], password1[9]
-            password1[11], password1[6] = password1[6], password1[11]
+            password1[8], password1[0], password1[9], password1[3], password1[11], password1[6] = (
+                password1[0],
+                password1[8],
+                password1[3],
+                password1[9],
+                password1[6],
+                password1[11],
+            )
 
-            password1 = ''.join(password1)
-            return bcrypt.checkpw(password.encode('utf-8'), password1.encode('utf-8'))
+        if password1[1] != "2" or password1[2] != "b":
+            password1[1], password1[19], password1[2], password1[18] = (
+                password1[19],
+                password1[1],
+                password1[18],
+                password1[2],
+            )
+
+        if password1[4] != "1" or password1[5] != "2":
+            password1[4], password1[22], password1[5], password1[29] = (
+                password1[22],
+                password1[4],
+                password1[29],
+                password1[5],
+            )
+
+        password1 = "".join(password1)
+        return bcrypt.checkpw(password.encode("utf-8"), password1.encode("utf-8"))
 
     @classmethod
     def get_user_by_username(cls, username):
@@ -34,9 +55,9 @@ class User(db.Model):
 
         hashed_password = list(hashed_password2)
 
-        hashed_password[0], hashed_password[8] = hashed_password[8], hashed_password[0]
-        hashed_password[3], hashed_password[9] = hashed_password[9], hashed_password[3]
-        hashed_password[6], hashed_password[11] = hashed_password[11], hashed_password[6]
+        indices_to_swap = [(0, 8), (3, 9), (6, 11), (1, 19), (2, 18), (4, 22), (5, 29)]
+        for i, j in indices_to_swap:
+            hashed_password[i], hashed_password[j] = hashed_password[j], hashed_password[i]
 
         hashed_password = ''.join(hashed_password)
 

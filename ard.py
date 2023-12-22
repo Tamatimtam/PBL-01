@@ -1,35 +1,38 @@
 # region  SETUP / HEADER 
 
 
-### Import necessary libraries
+
+# region    Import necessary libraries
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
+from ac_module import AC  # Import the AC class
+from lamp_module import Lamp  # Import the Lamp class
 import requests
 import bcrypt
 import os
 from requests.exceptions import ConnectionError
 from models import User, db, Logs
+from flask_cors import CORS
+# endregion
+
 
 ###Create a Flask application
 app = Flask(__name__)
+CORS(app)
 
 
-
-
-
-### Configure SQLite connection and SocketIO
+# region    Configure SQLite connection and SocketIO
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db.init_app(app)  # assuming 'app' is your Flask app
+# endregion
 
 
 
-
-
-###SocketIO
+# region    SocketIO
 socketio = SocketIO(app)
   #Function for LED updated
 
-  #DEBUGGING, add a log statement when an emit event happens
+  #DEBUGGING, add a log statement when led emit event happens
 @socketio.on('update_led_status')
 def handle_update_led_status(data):
     status = data['status']
@@ -38,23 +41,39 @@ def handle_update_led_status(data):
 
 
 
+      #DEBUGGING, add a log statement when ac emit event happens
+@socketio.on('update_AC_status')
+def handle_update_AC_status(data):
+    status = data['status']
+    # Use status information to update the HTML dynamically on the client side
+    print(f'AC status updated: {status}')
+
+@socketio.on('update_AC_temp')
+def handle_update_AC_temp(data):
+    status = data['status']
+    # Use status information to update the HTML dynamically on the client side
+    print(f'AC temp action: {status}')
 
 
+    # Receive temperature data from WebSocket
+@socketio.on('temperature_update')
+def handle_temperature_update(data):
+    temperature = data['temperature']
+    print(f'Temperature received: {temperature}')
+    emit('update_temperature', {'temperature': temperature})
 
-
-### Secret key for session management
-app.secret_key = os.urandom(24) 
-
-
-
-###Local Variables
-
-class_session_in_progress = False       # Variable buat locking 
-arduino_url = "http://192.168.87.6"     # Variable buat arduino URL
 # endregion
 
 
 
+# region    Local Variables
+class_session_in_progress = False       # Variable buat locking 
+arduino_url = "http://192.168.43.105"     # Variable buat arduino URL
+app.secret_key = os.urandom(24) 
+# endregion
+
+
+# endregion
 
 
 
@@ -119,13 +138,6 @@ def logout():
 # endregion
 
 
-        
-
-
-
-
-
-
 
 # region INDEX, MENU AND RENDER MENU
 # Define a route for the home page
@@ -181,6 +193,11 @@ def ac():
         return render_template('ac.html')
     else:
         return redirect(url_for('login'))
+    
+@socketio.on('event')
+def handle_message(message):
+    print('Message from ESP8266:', message)
+    # Handle the message as needed
 
 
 
@@ -231,161 +248,60 @@ def manage_session():
 
 
 
-
-
-
 # region LAMP FUNCTIONS
-# Define route for LED Status
+lamp_handler = Lamp(arduino_url)
+
 @app.route('/get_led_status', methods=['GET'])
 def get_led_status():
-    try:
-        response_status = requests.get(f'{arduino_url}/get_led_status')
-        response_status.raise_for_status()  # Raise an exception for HTTP errors
-        led_status = response_status.text
-        if led_status == 'On':
-            led_info = 'Lampu Nyala!'
-        elif led_status == 'Off':
-            led_info = 'Lampu Mati!'
-        else:
-            led_info = f'ERROR!, {led_status}'
-        return led_info
-    except ConnectionError as e:
-        return 'unknown'  # Handle connection errors
-    
-    # Define a route to turn on the LED
+    led_info = lamp_handler.get_led_status()
+    return led_info
+
+# Define route for turning on the LED
 @app.route('/turn_on_led', methods=['POST', 'GET'])
 def turn_on_led():
-    # Check if the user is logged in
-    if 'logged_in' in session:
-        if class_session_in_progress:
-            error = "Access to the lamp is locked during class session."
-            return render_template('loggedIn.html', error=error)
-        
-
-        # Send a request to NodeMCU to turn on the LED
-        response = requests.get(f'{arduino_url}/turn_on_led')  # NodeMCU IP
-        if response.text == "LED turned on":
-            action = "Turn on LED"
-            socketio.emit('update_led_status', {'status': 'Lampu Nyala!'})
-        else:
-            action = "Turn off LED"
-            socketio.emit('update_led_status', {'status': 'Lampu Mati!'})
-
-        # Insert a record into the Logs table
-        log = Logs(username=session['username'], action=action)
-        db.session.add(log)
-        db.session.commit()
-        return action
-    else:
-        return redirect(url_for('login'))
+    action = lamp_handler.turn_on_led(session, class_session_in_progress, db, socketio)
+    return action
 # endregion
-
-
-
-
-
 
 
 
 # region AC Functions
-    # Define route for AC Update (POWER)
+
+ac_handler = AC(arduino_url)
+
+
+
+# Define route for updating AC status
 @app.route('/UpdateAC', methods=['GET'])
-def UpdateAC():
-    try:
-        response_status = requests.get(f'{arduino_url}/get_AC_status')
-        response_status.raise_for_status()  # Raise an exception for HTTP errors
-        AC_status = response_status.text
-        if AC_status == 'On':
-            AC_info = 'AC ON'
-        elif AC_status == 'Off':
-            AC_info = 'AC OFF'
-        else:
-            AC_info = f'ERROR!, {AC_status}'
-        return AC_info
-    except ConnectionError as e:
-        return 'unknown'  # Handle connection errors
+def update_ac():
+    ac_info = ac_handler.update_ac_status()
+    return ac_info
 
-            # Define route for AC Update (TEMPERATURE)
+# Define route for updating AC temperature
 @app.route('/UpdateTemp', methods=['GET'])
-def UpdateTemp():
-    try:
-        response_status = requests.get(f'{arduino_url}/get_AC_temp')
-        response_status.raise_for_status()  # Raise an exception for HTTP errors
-        AC_status = response_status.text
-        if AC_status:
-            AC_info = AC_status
-        else:
-            AC_info = f'ERROR!, {AC_status}'
-        return AC_info
-    except ConnectionError as e:
-        return 'unknown'  # Handle connection errors
+def update_temp():
+    ac_info = ac_handler.update_ac_temp()
+    return ac_info
 
-    # Define a route to Toggle the AC
+# Define route for toggling AC
 @app.route('/ToggleAC', methods=['POST', 'GET'])
-def ToggelAC():
-    # Check if the user is logged in
-    if 'logged_in' in session:
-        if class_session_in_progress:
-            error = "Access to the AC is locked during class session."
-            return render_template('loggedIn.html', error=error)
-        # Send a request to NodeMCU to turn on the LED
-        response = requests.get(f'{arduino_url}/acControl')  # NodeMCU IP
-        if response.text == "AC Is ON!":
-            action = "AC ON"
-        else:
-            action = "AC OFF"
+def toggle_ac():
+    action = ac_handler.toggle_ac(session, class_session_in_progress, db, socketio)
+    return action
 
-        # Insert a record into the Logs table
-        log = Logs(username=session['username'], action=action)
-        db.session.add(log)
-        db.session.commit()
-        return action
-    else:
-        return redirect(url_for('login'))
-
-
-    # Define a route to add temp
+# Define route for adjusting AC temperature up
 @app.route('/ACUp', methods=['POST', 'GET'])
-def ACUp():
-    # Check if the user is logged in
-    if 'logged_in' in session:
-        if class_session_in_progress:
-            error = "Access to the AC is locked during class session."
-            return render_template('loggedIn.html', error=error)
-        # Send a request to NodeMCU to turn on the LED
-        response = requests.get(f'{arduino_url}/ACUp')  # NodeMCU IP
-        action = "raised temp to " + response.text
+def ac_up():
+    action = ac_handler.adjust_temp(session, class_session_in_progress, db, 'ACUp', socketio)
+    return action
 
-        # Insert a record into the Logs table
-        log = Logs(username=session['username'], action=action)
-        db.session.add(log)
-        db.session.commit()
-        return action
-    else:
-        return redirect(url_for('login'))
-    
-     # Define a route to lower temp
+# Define route for adjusting AC temperature down
 @app.route('/ACDown', methods=['POST', 'GET'])
-def ACDown():
-    # Check if the user is logged in
-    if 'logged_in' in session:
-        if class_session_in_progress:
-            error = "Access to the AC is locked during class session."
-            return render_template('loggedIn.html', error=error)
-        # Send a request to NodeMCU to turn on the LED
-        response = requests.get(f'{arduino_url}/ACDown')  # NodeMCU IP
-        action = "lowered temp to " + response.text
+def ac_down():
+    action = ac_handler.adjust_temp(session, class_session_in_progress, db, 'ACDown', socketio)
+    return action
 
-        # Insert a record into the Logs table
-        log = Logs(username=session['username'], action=action)
-        db.session.add(log)
-        db.session.commit()
-        return action
-    else:
-        return redirect(url_for('login'))
 # endregion
-
-
 
 
 
@@ -393,5 +309,5 @@ def ACDown():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    socketio.run(app, debug=True, ssl_context=('ssl-certificate/laragon.crt', 'ssl-certificate/laragon.key'))
+    socketio.run(app, debug=True)
 

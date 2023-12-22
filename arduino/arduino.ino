@@ -1,32 +1,86 @@
+#include <WebSockets4WebServer.h>
+#include <SocketIOclient.h>
+#include <WebSockets.h>
+#include <WebSocketsVersion.h>
+#include <WebSocketsServer.h>
+#include <WebSocketsClient.h>
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+#include <WebSocketsServer.h>
 #include <ESP8266WebServer.h>
+#include <Hash.h>
+#include <DHT.h>
 #include <IRremoteESP8266.h>
 #include <IRac.h>
-#include <IRutils.h>
+#include <IRutils.h>  
 #include <ir_Panasonic.h>
 
-const uint16_t kIrLed = D5; //GPIO Pin
-const int relay_pin = D2; //LED RELAY PIN
-int ledState = 0; //led status
-IRac ac(kIrLed); // Declare AC object
-
-#pragma region Hotspot Setup
-const char *ssid = "test";
-const char *password = "tamatama";
-#pragma endregion
 
 
+//DEFINE FOR WEBSOCKET VARIABLES
+String old_value, value, DHTTemp = "";
 
-ESP8266WebServer server(80);
+//DEFINE FOR DHT
+#define DHTPIN D2
+#define DHTTYPE DHT22 
+
+//PIN INSTANCE
+const uint16_t kIrLed = D5;                             //AC Pin
+const int relay_pin = D3;                               //RELAY PIN
+
+//VARIABLES
+int ledState = 0;                                       //led status
+bool acState = false;                                   //AC status
+int userTemperature = 25;                               //AC Temperature
+
+//OBJECT INSTANCE FOR LIBRARIES
+ESP8266WiFiMulti    WiFiMulti;                          // Wifi Object
+ESP8266WebServer    server(80);                         // Web Server Object
+WebSocketsServer    webSocket = WebSocketsServer(81);   //Websocket Object
+IRac ac(kIrLed);                                        //AC IR object
+DHT dht(DHTPIN, DHTTYPE);                               //DHT Object
 
 
-#pragma region //Local Variables
-bool acState = false; // Variable to store A/C state (off by default)
-int userTemperature = 25; // Default temperature setting
 
 
-#pragma endregion
+
+
+
+
+//WEBSOCKET DEFAULTS
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+
+  switch (type) {
+    case WStype_DISCONNECTED:
+      Serial.printf("[%u] Disconnected!\n", num);
+      break;
+
+    case WStype_CONNECTED: {
+        IPAddress ip = webSocket.remoteIP(num);
+        Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+        // send message to client
+        webSocket.sendTXT(num, "0");
+      }
+      break;
+
+    case WStype_TEXT:
+      Serial.printf("[%u] get Text: %s\n", num, payload);
+      // send message to client
+      // webSocket.sendTXT(num, "message here");
+      // send data to all connected clients
+      // webSocket.broadcastTXT("message here");
+      break;
+      
+    case WStype_BIN:
+      Serial.printf("[%u] get binary length: %u\n", num, length);
+      hexdump(payload, length);
+      // send message to client
+      // webSocket.sendBIN(num, payload, length);
+      break;
+  }
+
+}
 
 
 
@@ -76,18 +130,16 @@ void ACTurnOn() {
     server.send(200, "text/html", acState ? "AC Is ON!" : "AC Is OFF!");
 }
 
-
-void test() {
-  // Set temperature based on user input
-  ac.next.degrees = userTemperature;
-
-  // Toggle A/C state
-  ac.next.power = true; //library variable
-  
-  // Send Data to AC via IR
-    ac.sendAc();
-    server.send(200, "text/html", acState ? "AC Is ON!" : "AC Is OFF!");
+void getACStatus() {
+    server.send(200, "text/plain", (acState == 1) ? "On" : "Off");
 }
+
+void getACTemp() {
+      server.send(200, "text/plain", String(userTemperature));
+}
+
+void DHTSend() {} //NOT YET IMPLEMENTED
+
 
 
 
@@ -103,16 +155,10 @@ void getLEDStatus() {
     server.send(200, "text/plain", (ledState == 1) ? "On" : "Off");
 }
 
-void getACStatus() {
-    server.send(200, "text/plain", (acState == 1) ? "On" : "Off");
-}
-
-void getACTemp() {
-      server.send(200, "text/plain", String(userTemperature));
-}
 
 
 
+//WEB SERVER FUNCTIONS
 void handleRoot() {
   String buttonText = acState ? "Turn Off A/C" : "Turn On A/C";
   String html = "<html><body>"
@@ -131,6 +177,7 @@ void handleRoot() {
                 "</script>"
                 "<button onclick=\"setTemperature()\">Set</button>"
                 "<button onclick=\"window.location.href='/setTemperature'\">" + "Ubah Suhu AC" + "</button>";
+                
 
   // LED BUTTONS
   html += "<br> <br>";
@@ -147,12 +194,19 @@ void handleRoot() {
 
 
 
+  //404 
+  void handleNotFound() {
+  server.send(404,   "text/html", "<html><body><p>404 Error</p></body></html>" );
+}
 
 
-//Wifi and server startup
+
+
+
+//SETUP
 void setup() {
 
-  #pragma region //DEFAULT AC PARAMETERS
+    #pragma region //DEFAULT AC PARAMETERS
 ac.next.protocol = decode_type_t::LG;
 ac.next.model = 1;  // Some A/Cs have different models. Try just the first.
 ac.next.mode = stdAc::opmode_t::kCool;  // Run in cool mode initially.
@@ -171,26 +225,35 @@ ac.next.clean = false;  // Turn off any Cleaning options if we can.
 ac.next.clock = -1;  // Don't set any current time if we can avoid it.
 #pragma endregion
 
-  pinMode(relay_pin, OUTPUT);
-  digitalWrite(relay_pin, LOW); // set relay to off
-
-
-  //good old begin statement
+//SERIAL BEGIN
   Serial.begin(115200);
-  delay(200);
+  delay(500);
 
-  #pragma region // Set up Wi-Fi, and server
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+//SETUP relay_pin
+pinMode(relay_pin, OUTPUT);
+digitalWrite(relay_pin, LOW); // set relay to off
+
+//SETUP DHT
+dht.begin();
+
+//WIFI
+  WiFiMulti.addAP("test", "tamatama");
+  while (WiFiMulti.run() != WL_CONNECTED) {
+    delay(100);
     Serial.println("Connecting to WiFi...");
   }
-
-
-    // Print the IP address when connected
-  Serial.println("Connected to WiFi");
-  Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
+
+
+
+
+//WEBSOCKETS
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
+
+
+
+
 
   // Set up web server routes
   //AC
@@ -209,18 +272,29 @@ ac.next.clock = -1;  // Don't set any current time if we can avoid it.
   server.begin();
 
   Serial.println("Web server started");
-
-  #pragma endregion
-
 }
 
 
 
 
 
+void handleUserMessage() {
+  delay(1000);
+    DHTTemp = "SOCKET CONNECTED";    
+    // DHTTemp = dht.readTemperature();
+    webSocket.broadcastTXT(DHTTemp);
+    Serial.println("User message broadcasted: " + DHTTemp);
+  server.send(200, "text/html", "Message received and broadcasted successfully");
+}
 
-//just a handle function  for server
+
+
+
 void loop() {
+  
+  webSocket.loop();
   server.handleClient();
-  // Your other loop logic goes here
+  handleUserMessage();
+  
+
 }

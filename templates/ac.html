@@ -8,7 +8,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 </head>
 <body>
-<div class="main">  
+    <script>
+        socket1 = new WebSocket("ws:/" + "/" + "192.168.43.105" + ":81");
+        socket1.onopen = function(e) {  console.log("[socket] socket.onopen "); };
+        socket1.onerror = function(e) {  console.log("[socket] socket.onerror "); };
+        socket1.onmessage = function(e) {  
+            document.getElementById("DHT").innerHTML = e.data + "C";
+        };
+        </script>
+
+
+
+<div class="main" style="height: 700px;">  
     <a href="#" class="back-button" id="backButton">&larr; Back</a>
 
     <input type="checkbox" id="chk" aria-hidden="true">
@@ -32,6 +43,14 @@
             <button class="ac-button" id="decrease-temp">-</button>
             <span id="temperature">...</span>
             <button class="acbutton" id="increase-temp">+</button>
+        </div>
+    </div>
+
+    <div class="temperature-box">
+        <div class="temperature-control">
+            
+            <span id="DHT">...</span>
+            
         </div>
     </div>
 </div>
@@ -93,7 +112,13 @@
 </body>
 
 
+
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <script>
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+
     const temperatureLabel = document.getElementById("temperature");
     const decreaseTempButton = document.getElementById("decrease-temp");
     const increaseTempButton = document.getElementById("increase-temp");
@@ -105,7 +130,26 @@
     let acButtonEnabled = true; // Flag to track if the AC toggle button is enabled
     let buttonCooldown = false; // Flag to track if the temperature buttons are in cooldown
 
-    //Update LED Status Function
+
+    socket.on('update_AC_status', function(data) {
+        var status = data.status;
+        var acStatusElement = document.getElementById('ac-status');
+        var acToggle = document.getElementById('ac-toggle');
+        acStatusElement.textContent = status;
+        acToggle.checked = status === 'AC Nyala!';
+    });
+
+    socket.on('update_AC_temp', function(data) {
+        updateTemperature()
+    });
+
+    socket.on('update_temperature', function(data) {
+            document.getElementById('DHT').innerText = 'Suhu ruang: ' + data.temperature + ' °C';
+        });
+
+
+
+    //Update AC Status Function
     function updateAC() {
         fetch('/UpdateAC') //gets response from server
             .then(response => response.text()) //turns the response into text
@@ -212,7 +256,7 @@ increaseTempButton.addEventListener("click", () => {
     
 updateAC();
 updateTemperature();
-</script>
+</script> -->
 
 
 
