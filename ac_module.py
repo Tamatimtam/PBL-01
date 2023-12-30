@@ -8,6 +8,8 @@ import requests
 class AC:
     def __init__(self, arduino_url):
         self.arduino_url = arduino_url
+        self.temp = 0
+        self.status = "..."
 
     def update_ac_status(self):
         try:
@@ -15,12 +17,12 @@ class AC:
             response_status.raise_for_status()  # Raise an exception for HTTP errors
             ac_status = response_status.text
             if ac_status == 'On':
-                ac_info = 'AC ON'
+                self.status = 'AC ON'
             elif ac_status == 'Off':
-                ac_info = 'AC OFF'
+                self.status = 'AC OFF'
             else:
-                ac_info = f'ERROR!, {ac_status}'
-            return ac_info
+                self.status = f'ERROR!, {ac_status}'
+            return self.status
         except ConnectionError as e:
             return 'unknown'  # Handle connection errors
 
@@ -30,10 +32,10 @@ class AC:
             response_status.raise_for_status()  # Raise an exception for HTTP errors
             ac_status = response_status.text
             if ac_status:
-                ac_info = ac_status
+                self.temp = ac_status
             else:
-                ac_info = f'ERROR!, {ac_status}'
-            return ac_info
+                self.temp = f'ERROR!, {ac_status}'
+            return self.temp
         except ConnectionError as e:
             return 'unknown'  # Handle connection errors
 

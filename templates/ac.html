@@ -9,17 +9,17 @@
 </head>
 <body>
     <script>
-        socket1 = new WebSocket("ws:/" + "/" + "192.168.43.105" + ":81");
+        socket1 = new WebSocket("ws:/" + "/" + "192.168.87.6" + ":81");
         socket1.onopen = function(e) {  console.log("[socket] socket.onopen "); };
         socket1.onerror = function(e) {  console.log("[socket] socket.onerror "); };
         socket1.onmessage = function(e) {  
-            document.getElementById("DHT").innerHTML = e.data + "C";
+            document.getElementById("DHT").innerHTML = "Suhu ruang: " + e.data + "°C";
         };
         </script>
 
 
 
-<div class="main" style="height: 700px;">  
+<div class="main" style="height: 600px;">  
     <a href="#" class="back-button" id="backButton">&larr; Back</a>
 
     <input type="checkbox" id="chk" aria-hidden="true">
@@ -116,7 +116,7 @@
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <script>
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    var socket = io.connect('https://' + document.domain + ':' + location.port);
 
 
     const temperatureLabel = document.getElementById("temperature");
@@ -256,7 +256,7 @@ increaseTempButton.addEventListener("click", () => {
     
 updateAC();
 updateTemperature();
-</script> -->
+</script>
 
 
 

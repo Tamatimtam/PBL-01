@@ -280,8 +280,8 @@ dht.begin();
 
 void handleUserMessage() {
   delay(1000);
-    DHTTemp = "SOCKET CONNECTED";    
-    // DHTTemp = dht.readTemperature();
+//    DHTTemp = "SOCKET CONNECTED";    
+     DHTTemp = dht.readTemperature();
     webSocket.broadcastTXT(DHTTemp);
     Serial.println("User message broadcasted: " + DHTTemp);
   server.send(200, "text/html", "Message received and broadcasted successfully");

@@ -103,7 +103,7 @@
                 .then(data => {
                     updateLEDStatus();
                     // Emit WebSocket event when LED status changes
-                    socket.emit('update_led_status', { status: data });
+                    socket.emit('update_led_status', { status: data }); //send to local socket io function on line 87
                 })
                 .catch(error => {
                     console.error('Error:', error);

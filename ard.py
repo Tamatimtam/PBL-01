@@ -5,14 +5,16 @@
 # region    Import necessary libraries
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import SocketIO, emit
-from ac_module import AC  # Import the AC class
-from lamp_module import Lamp  # Import the Lamp class
-import requests
-import bcrypt
-import os
+
+from ac_module import AC        # Import the AC class
+from lamp_module import Lamp    # Import the Lamp class
+
+import requests                 #http request
+import bcrypt                   #password security
+import os                       
 from requests.exceptions import ConnectionError
-from models import User, db, Logs
-from flask_cors import CORS
+from models import User, db, Logs   #user and logs database
+from flask_cors import CORS         #for socketio ig
 # endregion
 
 
@@ -23,15 +25,15 @@ CORS(app)
 
 # region    Configure SQLite connection and SocketIO
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-db.init_app(app)  # assuming 'app' is your Flask app
+db.init_app(app)
 # endregion
 
 
 
 # region    SocketIO
-socketio = SocketIO(app)
-  #Function for LED updated
+socketio = SocketIO(app) #initiate socketIO object
 
+  #Function for LED updated
   #DEBUGGING, add a log statement when led emit event happens
 @socketio.on('update_led_status')
 def handle_update_led_status(data):
@@ -48,7 +50,7 @@ def handle_update_AC_status(data):
     # Use status information to update the HTML dynamically on the client side
     print(f'AC status updated: {status}')
 
-@socketio.on('update_AC_temp')
+@socketio.on('update_AC_temp')  
 def handle_update_AC_temp(data):
     status = data['status']
     # Use status information to update the HTML dynamically on the client side
@@ -68,7 +70,7 @@ def handle_temperature_update(data):
 
 # region    Local Variables
 class_session_in_progress = False       # Variable buat locking 
-arduino_url = "http://192.168.43.105"     # Variable buat arduino URL
+arduino_url = "http://192.168.87.6"     # Variable buat arduino URL
 app.secret_key = os.urandom(24) 
 # endregion
 
@@ -310,4 +312,3 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     socketio.run(app, debug=True)
-

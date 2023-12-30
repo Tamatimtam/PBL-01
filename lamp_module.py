@@ -8,6 +8,8 @@ import requests
 class Lamp:
     def __init__(self, arduino_url):
         self.arduino_url = arduino_url
+        self.status = "..."
+
 
     def get_led_status(self):
         try:
@@ -15,12 +17,12 @@ class Lamp:
             response_status.raise_for_status()  # Raise an exception for HTTP errors
             led_status = response_status.text
             if led_status == 'On':
-                led_info = 'Lampu Nyala!'
+                self.status = 'Lampu Nyala!'
             elif led_status == 'Off':
-                led_info = 'Lampu Mati!'
+                self.status = 'Lampu Mati!'
             else:
-                led_info = f'ERROR!, {led_status}'
-            return led_info
+                self.status = f'ERROR!, {led_status}'
+            return self.status
         except ConnectionError as e:
             return 'unknown'  # Handle connection errors
 
@@ -33,7 +35,7 @@ class Lamp:
             response = requests.get(f'{self.arduino_url}/turn_on_led')
             if response.text == "LED turned on":
                 action = "Turn on LED"
-                socketio.emit('update_led_status', {'status': 'Lampu Nyala!'})
+                socketio.emit(' ', {'status': 'Lampu Nyala!'})
             else:
                 action = "Turn off LED"
                 socketio.emit('update_led_status', {'status': 'Lampu Mati!'})

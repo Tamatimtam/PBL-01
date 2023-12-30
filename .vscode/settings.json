@@ -15,7 +15,6 @@
         ".venv/pyvenv.cfg": true,
         ".vscode": true,
         "CHRIS": true,
-        "instance": true,
         "old templates": true,
         "old-frontend": true,
         "secret'=": true
@@ -30,7 +29,6 @@
         ".venv/pyvenv.cfg",
         ".vscode",
         "CHRIS",
-        "instance",
         "old templates",
         "old-frontend",
         "secret'="
@@ -44,5 +42,6 @@
         "vector": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
