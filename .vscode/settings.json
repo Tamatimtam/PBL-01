@@ -6,7 +6,6 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
-        ".Linux": true,
         ".RUN": true,
         ".TAMA": true,
         ".venv": true,
@@ -20,7 +19,6 @@
         "secret'=": true
     },
     "hide-files.files": [
-        ".Linux",
         ".RUN",
         ".TAMA",
         ".venv",

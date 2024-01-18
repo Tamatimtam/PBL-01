@@ -3,19 +3,22 @@
 <head>
     <title>AC Control</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='loggedIn.css')}}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
     <meta name="view-transition"    content="same-origin"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 </head>
 <body>
-    <script>
-        socket1 = new WebSocket("ws:/" + "/" + "192.168.87.6" + ":81");
-        socket1.onopen = function(e) {  console.log("[socket] socket.onopen "); };
-        socket1.onerror = function(e) {  console.log("[socket] socket.onerror "); };
-        socket1.onmessage = function(e) {  
-            document.getElementById("DHT").innerHTML = "Suhu ruang: " + e.data + "°C";
-        };
-        </script>
+
+
+<script>
+    socket1 = new WebSocket("ws://" + "192.168.14.105:81");
+    socket1.onopen = function(e) {  console.log("[socket] socket.onopen "); };
+    socket1.onerror = function(e) {  console.log("[socket] socket.onerror "); };
+    socket1.onmessage = function(e) {  
+        document.getElementById("DHT").innerHTML = "Suhu ruang: " + e.data + "°C";
+    };
+    </script>
 
 
 
@@ -132,12 +135,25 @@
 
 
     socket.on('update_AC_status', function(data) {
-        var status = data.status;
-        var acStatusElement = document.getElementById('ac-status');
-        var acToggle = document.getElementById('ac-toggle');
-        acStatusElement.textContent = status;
-        acToggle.checked = status === 'AC Nyala!';
-    });
+        const ACStatusElement = document.getElementById('ac-status');
+    const lightToggle = document.getElementById('ac-toggle');
+    
+    if (data.status) {
+        ACStatusElement.textContent = data.status;  
+        lightToggle.checked = data.status === 'AC On!'; // Set the checkbox status
+        updateAC();
+
+        setTimeout(function() {
+        updateAC();
+        }, 2000);
+
+        console.error(data.status)
+        
+    } else {
+        console.error('Invalid data received:', data);
+    }
+});
+
 
     socket.on('update_AC_temp', function(data) {
         updateTemperature()
@@ -157,7 +173,8 @@
                 const ACStatusElement = document.getElementById('ac-status');
                 const lightToggle = document.getElementById('ac-toggle');
                 ACStatusElement.textContent = data;
-                lightToggle.checked = data === 'AC ON'; // Set the checkbox status
+                lightToggle.checked = data === 'AC On!'; // Set the checkbox status
+                socket.emit('update_AC_status', { status: data }); //
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -172,11 +189,13 @@
                 const ACTempElement = document.getElementById('temperature');
                 ACTempElement.textContent = data + "°C";
                 temperature = data;
+                
             })
+           
             .catch(error => {
                 console.error('Error:', error);
             });
-
+            
     }
 
     // Event listener for decreasing temperature
@@ -185,10 +204,10 @@ decreaseTempButton.addEventListener("click", () => {
         buttonCooldown = true; // Set cooldown flag
         setTimeout(() => { buttonCooldown = false; }, 1000); // Reset cooldown after 1000ms
 
-        temperature++;
+        temperature--;
         const ACTempElement = document.getElementById('temperature');
+        ACTempElement.textContent = temperature + "°C";
         fetch('/ACDown')
-        updateTemperature();
     } else {
         // Optionally: Provide some user feedback that the button is in cooldown
         console.log("Button in cooldown, please wait.");
@@ -203,8 +222,8 @@ increaseTempButton.addEventListener("click", () => {
 
         temperature++;
         const ACTempElement = document.getElementById('temperature');
+        ACTempElement.textContent = temperature + "°C";
         fetch('/ACUp')
-        updateTemperature();
     } else {
         // Optionally: Provide some user feedback that the button is in cooldown
         console.log("Button in cooldown, please wait.");
@@ -231,14 +250,21 @@ increaseTempButton.addEventListener("click", () => {
                 .then(data => {
                     if (acToggle.checked) {
                         // AC is turned on
-                        acStatus.textContent = "AC ON";
+                        acStatus.textContent = "AC On!";
                         console.log("AC is turned on");
+                        acToggle.checked = true;
                     } else {
                         // AC is turned off
                         acStatus.textContent = "AC OFF";
                         console.log("AC is turned off");
+                        acToggle.checked = false;
                     }
-                    updateAC();
+
+                    setTimeout(function() {
+                    updateAC(); 
+                    }, 2000);
+
+                
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -247,6 +273,8 @@ increaseTempButton.addEventListener("click", () => {
             // Display alert notification about the cooldown
             alert("Please wait 5 seconds between AC toggle actions.");
         }
+
+        updateAC()
     });
 
 

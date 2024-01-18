@@ -17,9 +17,9 @@ class Lamp:
             response_status.raise_for_status()  # Raise an exception for HTTP errors
             led_status = response_status.text
             if led_status == 'On':
-                self.status = 'Lampu Nyala!'
+                self.status = 'Lamp is On!'
             elif led_status == 'Off':
-                self.status = 'Lampu Mati!'
+                self.status = 'Lamp is Off!'
             else:
                 self.status = f'ERROR!, {led_status}'
             return self.status
@@ -35,10 +35,10 @@ class Lamp:
             response = requests.get(f'{self.arduino_url}/turn_on_led')
             if response.text == "LED turned on":
                 action = "Turn on LED"
-                socketio.emit(' ', {'status': 'Lampu Nyala!'})
+                socketio.emit('update_led_status', {'status': 'Lamp is On!'})
             else:
                 action = "Turn off LED"
-                socketio.emit('update_led_status', {'status': 'Lampu Mati!'})
+                socketio.emit('update_led_status', {'status': 'Lamp is Off!'})
 
             log = Logs(username=session['username'], action=action)
             db.session.add(log)

@@ -17,9 +17,9 @@ class AC:
             response_status.raise_for_status()  # Raise an exception for HTTP errors
             ac_status = response_status.text
             if ac_status == 'On':
-                self.status = 'AC ON'
+                self.status = 'AC On!'
             elif ac_status == 'Off':
-                self.status = 'AC OFF'
+                self.status = 'AC Off!'
             else:
                 self.status = f'ERROR!, {ac_status}'
             return self.status
@@ -47,11 +47,12 @@ class AC:
 
             response = requests.get(f'{self.arduino_url}/acControl')
             if response.text == "AC Is ON!":
-                action = "AC ON"
-                socketio.emit('update_AC_status', {'status': 'AC Nyala!'})
+                action = "AC On!"
+                socketio.emit('update_AC_status', {'status': ['AC On!']})
             else:
                 action = "AC OFF"
-                socketio.emit('update_AC_status', {'status': 'AC Mati!'})                
+                socketio.emit('update_AC_status', {'status': ['AC Off!']})     
+            print(response.text)           
 
             log = Logs(username=session['username'], action=action)
             db.session.add(log)

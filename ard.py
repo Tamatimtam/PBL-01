@@ -70,7 +70,8 @@ def handle_temperature_update(data):
 
 # region    Local Variables
 class_session_in_progress = False       # Variable buat locking 
-arduino_url = "http://192.168.87.6"     # Variable buat arduino URL
+AC_url = "http://192.168.14.105"     # Variable buat arduino URL
+lamp_url = "http://192.168.14.53"     # Variable buat arduino URL
 app.secret_key = os.urandom(24) 
 # endregion
 
@@ -92,13 +93,13 @@ def register():
             existing_user = User.query.filter_by(username=username).first()
 
             if existing_user:
-                error = 'Username already exists'
-                return render_template('register.html', error=error)
+                success_message = 'Username already exists'
+                return render_template('register.html', success_message=success_message)
 
             User.create_user(username, raw_password, role)
 
             success_message = 'User registered successfully'
-            return render_template('register.html', success_message=success_message)
+            return render_template('register.html'  , success_message=success_message)
 
         return render_template('register.html')
 
@@ -251,7 +252,7 @@ def manage_session():
 
 
 # region LAMP FUNCTIONS
-lamp_handler = Lamp(arduino_url)
+lamp_handler = Lamp(lamp_url)
 
 @app.route('/get_led_status', methods=['GET'])
 def get_led_status():
@@ -269,7 +270,7 @@ def turn_on_led():
 
 # region AC Functions
 
-ac_handler = AC(arduino_url)
+ac_handler = AC(AC_url)
 
 
 
@@ -311,4 +312,4 @@ def ac_down():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, ssl_context=('ssl-certificate/laragon.crt', 'ssl-certificate/laragon.key'))
