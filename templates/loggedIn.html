@@ -25,13 +25,23 @@
     
     <div class="welcome">
         <form>
-            <label style="text-align: center;" for="chk" aria-hidden="true">Welcome {{ name }}!</label>
-            <p style="margin: 10px; text-align: center;">{{ error }}</p>
-            <a href="lamp" class="menu-button">Control Lampu 💡</a>
-            <a href="ac" class="menu-button">Control AC ❄️</a>
-            <a href="{{ url_for('logout') }}" class="menu-button">Logout</a>
+            <label style="text-align: center; margin-bottom: 10px;" for="chk" aria-hidden="true">Welcome Admin {{ name }}!</label>
+            <div class="menu-container">
+                <div class="menu-text">
+                    <a href="lamp" class="menu-button">Control Lampu</a>
+                    <a href="ac" class="menu-button">Control AC</a>
+                    <a href="register" class="menu-button">Register User Baru</a>
+                    <a href="logs" class="menu-button">Lihat Riwayat</a>
+
+                    <a href="{{ url_for('logout') }}" class="menu-button">Logout</a>
+                </div>
+                <div class="menu-icons">
+                    💡 ❄️ 🆕 📃 <!-- Add your emoji icons here next to each menu item -->
+                </div>
+            </div>
         </form>
     </div>
+    
 </div>
 </body>
 

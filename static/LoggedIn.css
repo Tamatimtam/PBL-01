@@ -162,30 +162,81 @@ button:hover {
     transform: scale(.6);
 }
 
+/* Updated styles for menu buttons with icons */
 .menu-button {
+    display: flex;
+    align-items: center;
     width: 70%;
+<<<<<<< Updated upstream:static/LoggedIn.css
     height: 35px;
     margin: 40px auto;
     justify-content: center;
     display: block;
     color: #fff;
+=======
+    height: 30px;
+    margin: 30px auto;
+>>>>>>> Stashed changes:static/loggedIn.css
     background: #6968D4;
     font-size: 1.4em;
     font-weight: bold;
+<<<<<<< Updated upstream:static/LoggedIn.css
     margin-top: 60px;
     outline: none;
     border: none;
+=======
+>>>>>>> Stashed changes:static/loggedIn.css
     border-radius: 20px;
-    transition: .2s ease-in;
+    transition: background 0.2s ease-in;
     cursor: pointer;
+<<<<<<< Updated upstream:static/LoggedIn.css
     text-decoration: none; /* Remove underlines from links */
     text-align: center; /* Center text within the link */
     margin-top: 10px;
+=======
+    text-decoration: none;
+    text-align: center;
+    margin-top: 1px;
+>>>>>>> Stashed changes:static/loggedIn.css
     margin-bottom: 10px;
 }
 
 .menu-button:hover {
     background: #6d44b8;
+}
+
+.menu-button a {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-decoration: none; /* Remove underline from links */
+    margin-right: 27px;
+    color: #fff; /* Set text color to white */
+}
+
+.menu-button:hover a {
+    color: #fff; /* Set text color to white on hover */
+}
+
+.menu-button a,
+.menu-button .menu-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-decoration: none; /* Remove underline from links */
+    margin-right: 27px;
+    color: #fff; /* Set text color to white */
+}
+
+.menu-button:hover a,
+.menu-button:hover .menu-text {
+    color: #fff; /* Set text color to white on hover */
+}
+
+.emoji {
+    margin-right: 10px;
 }
 
 

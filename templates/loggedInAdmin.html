@@ -26,6 +26,7 @@
         </form>
     </div>
     
+<<<<<<< Updated upstream
     <div class="welcome">
         <form>
             <label style="text-align: center; margin-bottom: 10px;" for="chk" aria-hidden="true">Welcome Admin {{ name }}!</label>
@@ -40,9 +41,54 @@
                 {% endif %}
             </button>
             <a href="{{ url_for('logout') }}" class="menu-button">Logout</a>
+=======
+<!-- Inside the "welcome" div -->
+<div class="welcome">
+    <form>
+        <label style="text-align: center; margin-bottom: 10px;" for="chk" aria-hidden="true">Welcome Admin {{ name }}!</label>
 
-        </form>
-    </div>
+        <!-- Control Lampu -->
+        <div class="menu-button">
+            <span class="emoji">💡</span>
+            <a href="lamp">Control Lampu</a>
+        </div>
+
+        <!-- Control AC -->
+        <div class="menu-button">
+            <span class="emoji">❄️</span>
+            <a href="ac">Control AC</a>
+        </div>
+
+        <!-- Register User Baru -->
+        <div class="menu-button">
+            <span class="emoji">🆕</span>
+            <a href="register">Register User Baru</a>
+        </div>
+
+        <!-- Lihat Riwayat -->
+        <div class="menu-button">
+            <span class="emoji">📃</span>
+            <a href="logs">Lihat Riwayat</a>
+        </div>
+
+        <!-- Class Session Toggle -->
+        <div class="menu-button" id="toggle-class-session" style="font-size: 1.2em; font-family: 'Jost', sans-serif;">
+            {% if state %}
+                Class is in session! 🔒
+            {% else %}
+                Class is not in session 🔓
+            {% endif %}
+        </div>
+
+        <!-- Logout -->
+        <a href="{{ url_for('logout') }}" class="menu-button">
+            <span class="emoji">🚪</span>
+            <span class="menu-text">Logout</span>
+        </a>
+    </form>
+</div>
+>>>>>>> Stashed changes
+
 </div>
 </body>
 
