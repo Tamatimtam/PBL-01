@@ -29,9 +29,24 @@
         <form>
             <label style="text-align: center;" for="chk" aria-hidden="true">Welcome {{ name }}!</label>
             <p style="margin: 10px; text-align: center;">{{ error }}</p>
-            <a href="lamp" class="menu-button">Light Control 💡</a>
-            <a href="ac" class="menu-button">AC Control ❄️</a>
-            <a href="{{ url_for('logout') }}" class="menu-button">Logout</a>
+            <div style="width: auto; height: auto; bottom: 50px;"><!-- Control Lampu -->
+                <div class="menu-button">
+                    <span class="emoji">💡</span>
+                    <a href="lamp">Lamp Control</a>
+                </div>
+        
+                <!-- Control AC -->
+                <div class="menu-button">
+                    <span class="emoji">❄️</span>
+                    <a href="ac">AC Control</a>
+                </div>
+        
+        
+                <!-- Logout -->
+                <a href="{{ url_for('logout') }}" class="menu-button">
+                    <span class="emoji">🚪</span>
+                    <span class="menu-text">Logout</span>
+                </a></div>
         </form>
     </div>
 </div>

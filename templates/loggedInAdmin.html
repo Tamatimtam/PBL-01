@@ -4,8 +4,9 @@
     <title>Classify</title>
     <link rel="preload" as="style" href="style_in.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='loggedIn.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
     <meta name="view-transition" content="same-origin"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 </head>
@@ -26,25 +27,55 @@
             <button type="submit">Masuk</button>
         </form>
     </div>
-    
-    <div class="welcome">
-        <form>
-            <label style="text-align: center; margin-bottom: 10px;" for="chk" aria-hidden="true">Welcome Admin {{ name }}!</label>
-            <a href="lamp" class="menu-button">Light Control 💡</a>
-            <a href="ac" class="menu-button">AC Control ❄️</a>
-            <a href="register" class="menu-button">Register a New User</a>
-            <a href="logs" class="menu-button">History</a>
-            <button id="toggle-class-session" class="menu-button" style="font-size: 1.2em;">
-                {% if state %}
-                    Class is in session!
-                {% else %}
-                    Class is not in session.
-                {% endif %}
-            </button>
-            <a href="{{ url_for('logout') }}" class="menu-button">Logout</a>
 
-        </form>
-    </div>
+    
+<div class="welcome">
+    <form>
+        <label style="text-align: center; margin-bottom: 0px;" for="chk" aria-hidden="true">Welcome Admin {{ name }}!</label>
+
+        <div style="width: auto; height: auto; bottom: 50px;"><!-- Control Lampu -->
+            <div class="menu-button">
+                <span class="emoji">💡</span>
+                <a href="lamp">Lamp Control</a>
+            </div>
+    
+            <!-- Control AC -->
+            <div class="menu-button">
+                <span class="emoji">❄️</span>
+                <a href="ac">AC Control</a>
+            </div>
+    
+            <!-- Register User Baru -->
+            <div class="menu-button">
+                <span class="emoji">🆕</span>
+                <a href="register">Register User</a>
+            </div>
+    
+            <!-- Lihat Riwayat -->
+            <div class="menu-button">
+                <span class="emoji">📃</span>
+                <a href="logs">Check History</a>
+            </div>
+    
+            <!-- Class Session Toggle -->
+            <div class="menu-button" id="toggle-class-session">
+                {% if state %}
+                <p style="margin-top: 1px;"><span class="emoji" >🔒</span>
+                    Class in session! </p>
+                {% else %}
+                <p style="margin-top: 1px;"><span class="emoji">🔓</span>
+                    Class not in session </p>
+                {% endif %}
+            </div>
+    
+            <!-- Logout -->
+            <a href="{{ url_for('logout') }}" class="menu-button">
+                <span class="emoji">🚪</span>
+                <span class="menu-text">Logout</span>
+            </a></div>
+    </form>
+</div>
+
 </div>
 </body>
 

@@ -162,7 +162,10 @@ button:hover {
     transform: scale(.6);
 }
 
+/* Updated styles for menu buttons with icons */
 .menu-button {
+    display: flex;
+    align-items: center;
     width: 70%;
     height: 30px;
     margin: 40px auto;
@@ -172,14 +175,14 @@ button:hover {
     background: #6968D4;
     font-size: 1.2em;
     font-weight: bold;
+    margin-top: 1px;
     outline: none;
     border: none;
     border-radius: 20px;
-    transition: .2s ease-in;
+    transition: background 0.2s ease-in;
     cursor: pointer;
     text-decoration: none; /* Remove underlines from links */
     text-align: center; /* Center text within the link */
-    margin-top: 1px;
     margin-bottom: 10px;
 }
 
@@ -187,6 +190,38 @@ button:hover {
     background: #6d44b8;
 }
 
+.menu-button a {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-decoration: none; /* Remove underline from links */
+    margin-right: 27px;
+    color: #fff; /* Set text color to white */
+}
+
+.menu-button:hover a {
+    color: #fff; /* Set text color to white on hover */
+    
+}
+
+.emoji {
+    position: absolute;
+    left: 60px; /* Adjust the left position as needed */
+}
+
+.menu-button a, .menu-button p,
+.menu-button .menu-text {
+    flex: 1;
+    padding-left: 40px; /* Adjust the padding to make space for the emoji */
+    /* overflow: hidden; */
+    white-space: nowrap;
+    text-overflow: ellipsis;    
+    text-decoration: none; /* Remove underline from links */
+    margin-right: 27px;
+    color: #fff; /* Set text color to white */
+    padding-top: 1px;
+}
 
 
 .ac-control {
