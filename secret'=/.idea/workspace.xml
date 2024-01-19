@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9b3ce80e-a20e-497a-b906-410bfbac1d0a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../ac_module.py" beforeDir="false" afterPath="$PROJECT_DIR$/../ac_module.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ard.py" beforeDir="false" afterPath="$PROJECT_DIR$/../ard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../arduino/AC.ino" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../arduino/arduino.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../arduino/arduino.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../arduino/lamp.ino" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../instance/site.db" beforeDir="false" afterPath="$PROJECT_DIR$/../instance/site.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lamp_module.py" beforeDir="false" afterPath="$PROJECT_DIR$/../lamp_module.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../templates/ac.html" beforeDir="false" afterPath="$PROJECT_DIR$/../templates/ac.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="2aWB5qBAwvM18wfhcLU23HezGCn" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "TAMA",
+    "last_opened_file_path": "/home/timtam/Documents/Code/Python/PBL-01/secret'="
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9b3ce80e-a20e-497a-b906-410bfbac1d0a" name="Changes" comment="" />
+      <created>1704424273981</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1704424273981</updated>
+    </task>
+    <servers />
+  </component>
+</project>
