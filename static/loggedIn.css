@@ -160,6 +160,8 @@ button:hover {
 .welcome label {
     color: #573b8a;
     transform: scale(.6);
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 /* Updated styles for menu buttons with icons */
