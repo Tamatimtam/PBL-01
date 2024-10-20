@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Lamp Control</title>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='loggedIn.css')}}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+    <meta name="view-transition" content="same-origin"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+
+<body>
+
+<div class="main">
+    <a href="#" class="back-button" id="backButton">&larr; Back</a>
+
+    <input type="checkbox" id="chk" aria-hidden="true">
+
+    <div class="lamp-control">
+        <label for="chk" aria-hidden="true">Lamp Control</label>
+    </div>
+
+    <div class="toggle-box">
+        <div class="toggle-control">
+            <label class="switch">
+                <input type="checkbox" id="lamp-toggle">
+                <span style="width: 60px;" class="slider round"></span>
+            </label>
+            <span id="lamp-status">Requesting Lamp Status...</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles for the toggle box */
+    .toggle-box {
+        background: #fff;
+        border-radius: 30px;
+        margin: 90px 30px 1px;
+        padding: 20px;
+    }
+
+    /* Styles for centering the toggle and "Lamp ON" or "Lamp OFF" text */
+    .lamp-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .lamp-control label {
+        margin: 10px;
+    }
+
+    /* Specific selectors for Lamp ON and Lamp OFF text */
+    .toggle-control #lamp-status {
+        color: black;
+        margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
+    }
+
+    .toggle-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+
+
+</body>
+
+
+<!-- Back Button JS -->
+<script>
+    document.getElementById('backButton').addEventListener('click', function(event) {
+        event.preventDefault(); 
+        history.back(); // Go back to the previous page in the browser history
+    });
+</script>
+
+<!-- Main JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    var socket = io.connect('https://' + document.domain + ':' + location.port);
+
+    socket.on('update_led_status', function(data) {
+        var status = data.status;
+        var lampStatusElement = document.getElementById('lamp-status');
+        var lampToggle = document.getElementById('lamp-toggle');
+        lampStatusElement.textContent = (status === "Lamp is On!") ? "Lamp is Off!" : "Lamp is On!";
+
+        lampToggle.checked = lampStatusElement.textContent === 'Lamp is On!';
+    });
+
+    // Define Const
+    const lampToggle = document.getElementById("lamp-toggle");
+    const lampStatus = document.getElementById("lamp-status");
+
+    // Toggle Light Function
+    function toggleLight() {
+        fetch('/turn_on_led')
+            .then(response => response.text())
+                .then(data => {
+                    updateLEDStatus();
+                    // Emit WebSocket event when LED status changes
+                    socket.emit('update_led_status', { status: data }); //send to local socket io function on line 87
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+    }   
+
+
+    //test
+    // Event listener for toggling Lamp on and off
+    lampToggle.addEventListener("change", () => {
+        toggleLight();
+        if (lampToggle.checked) {
+            // Lamp is turned on
+            lampStatus.textContent = "Lamp is On!";
+            console.log("Lamp is turned on");
+        } else {
+            // Lamp is turned off
+            lampStatus.textContent = "Lamp is Off!";
+            console.log("Lamp is turned off");
+        }
+        updateLEDStatus();
+    });
+
+    // Update LED Status Function
+    function updateLEDStatus() {
+        fetch('/get_led_status')
+            .then(response => response.text())
+            .then(data => {
+                const lightStatusElement = document.getElementById('lamp-status');
+                const lightToggle = document.getElementById('lamp-toggle');
+                lightStatusElement.textContent = data;
+                lightToggle.checked = data === 'Lamp is On!';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Initial UpdateLEDStatus on page load
+    updateLEDStatus();
+</script>
+
+
+</html>

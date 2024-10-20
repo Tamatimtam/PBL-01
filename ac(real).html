@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AC Control</title>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='loggedIn.css')}}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+    <meta name="view-transition"    content="same-origin"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+</head>
+<body>
+
+
+<!-- <script>
+    socket1 = new WebSocket("ws://" + "192.168.14.105:81");
+    socket1.onopen = function(e) {  console.log("[socket] socket.onopen "); };
+    socket1.onerror = function(e) {  console.log("[socket] socket.onerror "); };
+    socket1.onmessage = function(e) {  
+        document.getElementById("DHT").innerHTML = "Suhu ruang: " + e.data + "°C";
+    };
+    </script> -->
+
+        
+
+    
+
+
+
+<div class="main" style="height: 600px;">  
+    <a href="#" class="back-button" id="backButton">&larr; Back</a>
+
+    <input type="checkbox" id="chk" aria-hidden="true">
+    
+    <div class="ac-control">
+        <label for="chk" aria-hidden="true">AC Control</label>
+    </div>
+    
+    <div class="toggle-box">
+        <div class="toggle-control">
+            <label class="switch">
+                <input type="checkbox" id="ac-toggle">
+                <span style="width: 60px;" class="slider round"></span>
+            </label>
+            <span id="ac-status">Requesting AC Status...  </span>
+        </div>
+    </div>
+    
+    <div class="temperature-box">
+        <div class="temperature-control">
+            <button class="ac-button" id="decrease-temp">-</button>
+            <span id="temperature">...</span>
+            <button class="acbutton" id="increase-temp">+</button>
+        </div>
+    </div>
+
+    <div class="temperature-box">
+        <div class="temperature-control">
+            
+            <span id="DHT">...</span>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles for the toggle box */
+    .toggle-box {
+        background: #fff;
+        border-radius: 20px;
+        margin: 20px 30px 1px;
+        padding: 10px;
+    }
+
+    /* Styles for the temperature box */
+    .temperature-box {
+        background: #fff;
+        border-radius: 20px;
+        margin: 20px 30px;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Styles for centering the toggle and "AC ON" or "AC OFF" text */
+    .ac-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .ac-control label {
+        margin: 10px;
+    }
+
+    /* Specific selectors for AC ON and AC OFF text */
+    /* Specific selectors for AC ON and AC OFF text */
+    .toggle-control #ac-status {
+        color: black;
+        margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
+    }
+
+    .toggle-control #ac-status.on {
+        color: green; /* Green color for "AC ON" */
+    }
+
+    .toggle-control #ac-status.off {
+        color: red; /* Red color for "AC OFF" */
+    }
+
+    .toggle-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+
+</body>
+
+
+
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    var socket = io.connect('https://' + document.domain + ':' + location.port);
+
+
+    const temperatureLabel = document.getElementById("temperature");
+    const decreaseTempButton = document.getElementById("decrease-temp");
+    const increaseTempButton = document.getElementById("increase-temp");
+    const chk = document.getElementById("chk");
+    const acToggle = document.getElementById("ac-toggle");
+    const acStatus = document.getElementById("ac-status");
+
+    let temperature = 25;
+    let acButtonEnabled = true; // Flag to track if the AC toggle button is enabled
+    let buttonCooldown = false; // Flag to track if the temperature buttons are in cooldown
+
+
+    socket.on('update_AC_status', function(data) {
+        const ACStatusElement = document.getElementById('ac-status');
+    const lightToggle = document.getElementById('ac-toggle');
+    
+    if (data.status) {
+        ACStatusElement.textContent = data.status;  
+        lightToggle.checked = data.status === 'AC On!'; // Set the checkbox status
+        updateAC();
+
+        setTimeout(function() {
+        updateAC();
+        }, 2000);
+
+        console.error(data.status)
+        
+    } else {
+        console.error('Invalid data received:', data);
+    }
+});
+
+
+    socket.on('update_AC_temp', function(data) {
+        updateTemperature()
+    });
+
+    socket.on('update_temperature', function(data) {
+            document.getElementById('DHT').innerText = 'Suhu ruang: ' + data.temperature + ' °C';
+        });
+
+
+
+    //Update AC Status Function
+    function updateAC() {
+        fetch('/UpdateAC') //gets response from server
+            .then(response => response.text()) //turns the response into text
+            .then(data => { //takes int the response and processes it to the next few lines
+                const ACStatusElement = document.getElementById('ac-status');
+                const lightToggle = document.getElementById('ac-toggle');
+                ACStatusElement.textContent = data;
+                lightToggle.checked = data === 'AC On!'; // Set the checkbox status
+                socket.emit('update_AC_status', { status: data }); //
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Function to update the temperature label
+    function updateTemperature() {
+        fetch('/UpdateTemp') //gets response from server                                  //GET THE ROUTE FOR UPDATE AC TEMP ON FLASK
+            .then(response => response.text()) //turns the response into text
+            .then(data => { //takes int the response and processes it to the next few lines
+                const ACTempElement = document.getElementById('temperature');
+                ACTempElement.textContent = data + "°C";
+                temperature = data;
+                
+            })
+           
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            
+    }
+
+    // Event listener for decreasing temperature
+decreaseTempButton.addEventListener("click", () => {
+    if (!buttonCooldown && temperature > 18) {
+        buttonCooldown = true; // Set cooldown flag
+        setTimeout(() => { buttonCooldown = false; }, 1000); // Reset cooldown after 1000ms
+
+        temperature--;
+        const ACTempElement = document.getElementById('temperature');
+        ACTempElement.textContent = temperature + "°C";
+        fetch('/ACDown')
+    } else {
+        // Optionally: Provide some user feedback that the button is in cooldown
+        console.log("Button in cooldown, please wait.");
+    }
+});
+
+// Event listener for increasing temperature
+increaseTempButton.addEventListener("click", () => {
+    if (!buttonCooldown && temperature < 30) {
+        buttonCooldown = true; // Set cooldown flag
+        setTimeout(() => { buttonCooldown = false; }, 1000); // Reset cooldown after 1000ms
+
+        temperature++;
+        const ACTempElement = document.getElementById('temperature');
+        ACTempElement.textContent = temperature + "°C";
+        fetch('/ACUp')
+    } else {
+        // Optionally: Provide some user feedback that the button is in cooldown
+        console.log("Button in cooldown, please wait.");
+    }
+});
+
+    
+
+    //Enable button again after cooldown
+    function enableACButton() {
+        acButtonEnabled = true;
+        acToggle.disabled = false; // Re-enable the AC toggle button
+    }   
+    // Event listener for toggling AC on and off
+    acToggle.addEventListener("change", () => {
+        if (acButtonEnabled) {
+            // AC button is enabled, proceed with the action
+            acButtonEnabled = false; // Disable the button
+            acToggle.disabled = true; // Disable the AC toggle button during cooldown
+            setTimeout(enableACButton, 5000); // Enable the button after 5 seconds
+
+            fetch('/ToggleAC')
+                .then(response => response.text())
+                .then(data => {
+                    if (acToggle.checked) {
+                        // AC is turned on
+                        acStatus.textContent = "AC On!";
+                        console.log("AC is turned on");
+                        acToggle.checked = true;
+                    } else {
+                        // AC is turned off
+                        acStatus.textContent = "AC OFF";
+                        console.log("AC is turned off");
+                        acToggle.checked = false;
+                    }
+
+                    setTimeout(function() {
+                    updateAC(); 
+                    }, 2000);
+
+                
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        } else {
+            // Display alert notification about the cooldown
+            alert("Please wait 5 seconds between AC toggle actions.");
+        }
+
+        updateAC()
+    });
+
+
+
+
+
+    
+updateAC();
+updateTemperature();
+
+function updateRandomNumber() {
+            // Generate a random number between 1 and 10
+            var randomNumber = Math.floor((Math.random() * 5) + 1) * 0.10 + 25.0;
+
+            // Display the random number on your website
+            document.getElementById("DHT").innerHTML = "Room temperature: " + randomNumber     + "°C";
+
+        }
+    
+        // Call the function initially
+        updateRandomNumber();
+    
+        // Set up an interval to update the random number every second (1000 milliseconds)
+        setInterval(updateRandomNumber, 5000);
+</script>
+
+
+
+
+    <!-- Back Button JS -->
+    <script>
+        // Add this script to handle the back button click
+document.getElementById('backButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    history.back(); // Go back to the previous page in the browser history
+});
+</script>
+
+
+</html>
+
+
+
+
+

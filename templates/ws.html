@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Update</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Current Variable: <span id="variable">{{ variable }}</span></h1>
+    <script type="text/javascript">
+        var socket = io();
+        socket.on('update', function(new_value) {
+            document.getElementById('variable').innerText = new_value;
+        });
+    </script>
+</body>
+</html>
+    

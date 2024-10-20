@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Usage Graph</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='table.css')}}">
+    
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Jost', sans-serif;
+            /* background: linear-gradient(to bottom, #573b8a, #5346AF); */
+            background: url('/static/bg.jpg') no-repeat center/cover;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            margin-top: 90px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f2f2f2;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Power Usage Graph</h1>
+        <canvas id="power-usage-chart" width="3200" height="1600"></canvas>
+        
+        <a href="/logs" class="button">Back to User Logs</a> <!-- Added back button to redirect to user_logs.html -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('power-usage-chart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                    // Example data in kWh (kilowatt-hours)
+                    datasets: [{
+                        label: 'AC',
+                        data: [2.5, 3.6, 2.8, 4.2, 4.8], // Dummy data for lighting power usage in kWh
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Lights',
+                        data: [2.0, 2.2, 2.1, 2.3, 2.5], // Dummy data for AC power usage in kWh
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Power Usage (kWh)'
+                            }
+                        }
+                    }
+                }      
+            });
+        });
+    </script>
+</body>
+</html>

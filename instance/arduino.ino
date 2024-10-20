@@ -15,11 +15,56 @@
 #include <IRac.h>
 #include <IRutils.h>  
 #include <ir_Panasonic.h>
+#include <espnow.h>
+
 
 
 
 //DEFINE FOR WEBSOCKET VARIABLES
 String old_value, value, DHTTemp = "";
+
+//DEFINE MAC ADDRESS OF RECIEVER
+uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+//DEFINE A DATASTRUCTURE
+typedef struct ESPNowStruct {
+int command;
+int data;  
+} ESPNowStruct;
+
+ESPNowStruct DataClassify;
+
+//DEFINE CALLBACK
+void OnDataRecv(uint8_t * mac_addr, uint8_t *incomingData, uint8_t len) {
+    memcpy(&message, incomingData, sizeof(message));
+
+    // Process received data
+    switch (message.command) {
+        case 1: // Toggle AC power
+            acState = message.data;
+            ac.next.power = acState;
+            ac.sendAc();
+            break;
+        case 2: // AC up command
+            userTemperature = message.data;
+            ac.next.degrees = userTemperature;
+            ac.sendAc();
+            break;
+        case 3: // AC down command
+            userTemperature = message.data;
+            ac.next.degrees = userTemperature;
+            ac.sendAc();
+            break;
+        case 4: // LAMP toggle command
+            ledState = message.data;
+            digitalWrite(relay_pin, ledState); // Set the LED state
+            break;
+        default:
+            // Handle unknown command
+            break;
+    }
+}
+
+
 
 //DEFINE FOR DHT
 #define DHTPIN D2
@@ -106,6 +151,10 @@ void ACUp() {
   ac.next.degrees = userTemperature;
   ac.sendAc();
     server.send(200, "text/html", String(userTemperature));
+
+  DataClassify.command = 2;
+  DataClassify.data = userTemperature;
+  esp_now_send(broadcastAddress, (uint8_t *) &DataClassify, sizeof(DataClassify));
 }
 
 void ACDown() {
@@ -114,6 +163,10 @@ void ACDown() {
   ac.next.degrees = userTemperature;
   ac.sendAc();
     server.send(200, "text/html", String(userTemperature));
+
+  DataClassify.command = 3;
+  DataClassify.data = userTemperature;
+  esp_now_send(broadcastAddress, (uint8_t *) &DataClassify, sizeof(DataClassify));
 }
 
 void ACTurnOn() {
@@ -128,6 +181,10 @@ void ACTurnOn() {
   // Send Data to AC via IR
     ac.sendAc();
     server.send(200, "text/html", acState ? "AC Is ON!" : "AC Is OFF!");
+
+    DataClassify.command = 1;
+    DataClassify.data = acState;
+    esp_now_send(broadcastAddress, (uint8_t *) &DataClassify, sizeof(DataClassify));
 }
 
 void getACStatus() {
@@ -149,6 +206,10 @@ void toggleLED() {
 
     digitalWrite(relay_pin, ledState); // Set the LED state
     server.send(200, "text/plain", ledState ? "LED turned on" : "LED turned off");
+
+    DataClassify.command = 4;
+    DataClassify.data = ledState
+    esp_now_send(broadcastAddress, (uint8_t *) &DataClassify, sizeof(DataClassify));
 }
 
 void getLEDStatus() {
@@ -190,10 +251,6 @@ void handleRoot() {
   
   server.send(200, "text/html", html);
 }
-
-
-
-
   //404 
   void handleNotFound() {
   server.send(404,   "text/html", "<html><body><p>404 Error</p></body></html>" );
@@ -244,7 +301,14 @@ dht.begin();
   }
   Serial.println(WiFi.localIP());
 
-
+//ESPNOW
+If (esp_now_init() != ESP_OK) {
+	Serial.println("ERROR ESPNOW");
+	return;
+}
+esp_now_register_recv_cb(OnDataRecv);
+esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
+esp_now_add_peer(broadcastAddress, ESP_NOW_ROLE_COMBO, 2f, NULL, 0);
 
 
 //WEBSOCKETS

@@ -6,77 +6,115 @@
     <title>Smart Lamp Control</title>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='loggedIn.css')}}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
     <meta name="view-transition" content="same-origin"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
 
 <body>
+    <div class="main" style="height: 550px;">
+        <a href="#" class="back-button" id="backButton">&larr; Back</a>
 
-<div class="main">
-    <a href="#" class="back-button" id="backButton">&larr; Back</a>
+        <input type="checkbox" id="chk" aria-hidden="true">
 
-    <input type="checkbox" id="chk" aria-hidden="true">
+        <div class="lamp-control">
+            <label for="chk" aria-hidden="true">Lamp Control</label>
+        </div>
 
-    <div class="lamp-control">
-        <label for="chk" aria-hidden="true">Lamp Control</label>
-    </div>
+        <div class="toggle-box">
+            <div class="toggle-control">
+                <label class="switch">
+                    <input type="checkbox" id="ac-toggle1" data-ac-id="1">
+                    <span style="width: 60px;" class="slider round"></span>
+                </label>
+                <span style="width: 90px;">ESP A <br></span>
+                <span id="ac-status1" data-ac-id="1">Requesting AC Status...  </span>
+            </div>
+        </div>
 
-    <div class="toggle-box">
-        <div class="toggle-control">
-            <label class="switch">
-                <input type="checkbox" id="lamp-toggle">
-                <span style="width: 60px;" class="slider round"></span>
-            </label>
-            <span id="lamp-status">Requesting Lamp Status...</span>
+        <div class="toggle-box">
+            <div class="toggle-control">
+                <label class="switch">
+                    <input type="checkbox" id="ac-toggle2" data-ac-id="2">
+                    <span style="width: 60px;" class="slider round"></span>
+                </label>
+                <span style="width: 90px;">ESP B <br></span>
+                <span id="ac-status2" data-ac-id="2">Requesting AC Status...  </span>
+            </div>
+        </div>
+
+        <div class="toggle-box">
+            <div class="toggle-control">
+                <label class="switch">
+                    <input type="checkbox" id="ac-toggle3" data-ac-id="3">
+                    <span style="width: 60px;" class="slider round"></span>
+                </label>
+                <span style="width: 150px;">ESP A + B<br></span>
+                <span id="ac-status3" data-ac-id="3">Requesting AC Status...  </span>
+            </div>
         </div>
     </div>
-</div>
 
-<style>
-    /* Styles for the toggle box */
-    .toggle-box {
-        background: #fff;
-        border-radius: 30px;
-        margin: 90px 30px 1px;
-        padding: 20px;
-    }
+    <style>
+        /* Styles for the toggle box */
+        .toggle-box {
+            background: #fff;
+            border-radius: 20px;
+            margin: 20px 30px 1px;
+            padding: 10px;
+        }
 
-    /* Styles for centering the toggle and "Lamp ON" or "Lamp OFF" text */
-    .lamp-control {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 20px;
-    }
+        /* Styles for the temperature box */
+        .temperature-box {
+            background: #fff;
+            border-radius: 20px;
+            margin: 20px 30px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
 
-    .lamp-control label {
-        margin: 10px;
-    }
+        /* Styles for centering the toggle and "AC ON" or "AC OFF" text */
+        .ac-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            height: 40px;
+        }
 
-    /* Specific selectors for Lamp ON and Lamp OFF text */
-    .toggle-control #lamp-status {
-        color: black;
-        margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
-    }
+        .ac-control label {
+            margin: 10px;
+        }
 
-    .toggle-control {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-</style>
+        /* Specific selectors for AC ON and AC OFF text */
+        .toggle-control #ac-status {
+            color: black;
+            margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
+        }
 
+        .toggle-control #ac-status.on {
+            color: green; /* Green color for "AC ON" */
+        }
 
+        .toggle-control #ac-status.off {
+            color: red; /* Red color for "AC OFF" */
+        }
+
+        .toggle-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+        }
+    </style>
 
 </body>
-
 
 <!-- Back Button JS -->
 <script>
     document.getElementById('backButton').addEventListener('click', function(event) {
-        event.preventDefault(); 
+        event.preventDefault();
         history.back(); // Go back to the previous page in the browser history
     });
 </script>
@@ -84,69 +122,73 @@
 <!-- Main JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <script>
-    var socket = io.connect('https://' + document.domain + ':' + location.port);
+    // Define Constants
+    const acToggles = document.querySelectorAll('[id^=ac-toggle]');
 
-    socket.on('update_led_status', function(data) {
-        var status = data.status;
-        var lampStatusElement = document.getElementById('lamp-status');
-        var lampToggle = document.getElementById('lamp-toggle');
-        lampStatusElement.textContent = status;
-        lampToggle.checked = status === 'Lamp is On!';
-    });
+    // Function to update individual AC status
+    function updateACStatus(id, status) {
+        const acStatusElement = document.getElementById(`ac-status${id}`);
+        const acToggleButton = document.getElementById(`ac-toggle${id}`);
+        if (acStatusElement) {
+            acStatusElement.textContent = status ? "On" : "Off";
+            console.log(`AC ${id} is turned ${status ? "on" : "off"}`);
+            acToggleButton.checked = status;
+        }
+    }
 
-    // Define Const
-    const lampToggle = document.getElementById("lamp-toggle");
-    const lampStatus = document.getElementById("lamp-status");
+    // Function to fetch and toggle AC status
+    function fetchAndToggleAC(id, checked) {
+        if (id == 3) {
+            // Directly update the AC status without making the fetch call
+            updateACStatus(1, checked);
+            updateACStatus(2, checked);
+            updateACStatus(id, checked);
 
-    // Toggle Light Function
-    function toggleLight() {
-        fetch('/turn_on_led')
-            .then(response => response.text())
+            return fetch(`/turn_on_led?acId=${id}`)
+                .then(response => response.text())
                 .then(data => {
-                    updateLEDStatus();
-                    // Emit WebSocket event when LED status changes
-                    socket.emit('update_led_status', { status: data }); //send to local socket io function on line 87
+                    updateACStatus(id, checked);
                 })
                 .catch(error => {
                     console.error('Error:', error);
                 });
-    }   
-
-
-    //test
-    // Event listener for toggling Lamp on and off
-    lampToggle.addEventListener("change", () => {
-        toggleLight();
-        if (lampToggle.checked) {
-            // Lamp is turned on
-            lampStatus.textContent = "Lamp is On!";
-            console.log("Lamp is turned on");
         } else {
-            // Lamp is turned off
-            lampStatus.textContent = "Lamp is Off!";
-            console.log("Lamp is turned off");
+            // Make the fetch call and then update the AC status
+            return fetch(`/turn_on_led?acId=${id}`)
+                .then(response => response.text())
+                .then(data => {
+                    updateACStatus(id, checked);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         }
-        updateLEDStatus();
-    });
-
-    // Update LED Status Function
-    function updateLEDStatus() {
-        fetch('/get_led_status')
-            .then(response => response.text())
-            .then(data => {
-                const lightStatusElement = document.getElementById('lamp-status');
-                const lightToggle = document.getElementById('lamp-toggle');
-                lightStatusElement.textContent = data;
-                lightToggle.checked = data === 'Lamp is On!';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
     }
 
-    // Initial UpdateLEDStatus on page load
-    updateLEDStatus();
+    // Add event listeners to AC toggles
+    acToggles.forEach(acToggle => {
+        acToggle.addEventListener("change", () => {
+            const acId = acToggle.getAttribute('data-ac-id'); // Get the AC ID from the data attribute
+    
+
+            if (acId === '3') {
+            // Toggle individual AC unit
+            fetchAndToggleAC(acId, acToggle.checked).then(() => {
+                acToggle.disabled = false; // Re-enable the button
+            });
+        } else {
+            // Toggle individual AC unit
+            fetchAndToggleAC(acId, acToggle.checked).then(() => {
+                acToggle.disabled = false; // Re-enable the button
+            });
+        }
+
+        });
+    });
+
+    // Initial update of AC statuses
+    updateACStatus(1, false); // Initial status assumed as 'Off'
+    updateACStatus(2, false); // Initial status assumed as 'Off'
+    updateACStatus(3, false); // Initial status assumed as 'Off'
 </script>
-
-
 </html>

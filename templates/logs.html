@@ -2,17 +2,18 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='table.css')}}">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
-    <title>User Logs</title>
-    <meta name="view-transition"    content="same-origin"/>
+    <title>AC Usage Logs</title>
+    <meta name="view-transition" content="same-origin"/>
 </head>
 <body>
-    <div class="container">
-        <h1>User Logs</h1>
+    <div class="container mt-5">
+        <h1>AC Usage Logs</h1>
         <!-- Add a table to display the logs -->
-        <table class="logs-table">
+        <table class="table table-striped logs-table">
             <thead>
                 <tr>
                     <th>User</th>
@@ -32,22 +33,105 @@
             </tbody>
         </table>
         
-        <a href="/menu_admin">Back to Home</a>
-    </div>
+        <a href="/graph" class="btn btn-primary">View Power Usage Graph</a> <!-- Added button to redirect to graph.html -->
+        <a href="/menu_admin" class="btn btn-secondary">Back to Home</a>
+        
+        <h2 class="mt-5">AC Usage - Last Week</h2>
+        <table class="table table-bordered ac-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Hours On</th>
+                    <th>Kwh Used</th>
+                    <th>Avg. Temperature (°C)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Example data for AC usage -->
+                <tr>
+                    <td>Monday</td>
+                    <td>5 hours</td>
+                    <td>15 kWh</td>
+                    <td>22°C</td>
+                </tr>
+                <tr>
+                    <td>Tuesday</td>
+                    <td>6 hours</td>
+                    <td>18 kWh</td>
+                    <td>23°C</td>
+                </tr>
+                <tr>
+                    <td>Wednesday</td>
+                    <td>4 hours</td>
+                    <td>12 kWh</td>
+                    <td>21°C</td>
+                </tr>
+                <tr>
+                    <td>Thursday</td>
+                    <td>7 hours</td>
+                    <td>21 kWh</td>
+                    <td>22°C</td>
+                </tr>
+                <tr>
+                    <td>Friday</td>
+                    <td>5.5 hours</td>
+                    <td>16.5 kWh</td>
+                    <td>24°C</td>
+                </tr>
+                <tr>
+                    <td>Saturday</td>
+                    <td>8 hours</td>
+                    <td>24 kWh</td>
+                    <td>23°C</td>
+                </tr>
+                <tr>
+                    <td>Sunday</td>
+                    <td>6.5 hours</td>
+                    <td>19.5 kWh</td>
+                    <td>22°C</td>
+                </tr>
+            </tbody>
+        </table>
 
-    
+        <h2 class="mt-5">AC Usage Chart</h2>
+        <div id="ac_chart" style="width: 100%; height: 500px;"></div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
         $(document).ready(function() {
             $('.logs-table').DataTable();
         });
+
+        // Load Google Charts
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Day', 'Hours On', 'Kwh Used', 'Avg. Temperature (°C)'],
+                ['Monday',  5,  15, 22],
+                ['Tuesday',  6,  18, 23],
+                ['Wednesday',  4,  12, 21],
+                ['Thursday',  7,  21, 22],
+                ['Friday',  5.5,  16.5, 24],
+                ['Saturday',  8,  24, 23],
+                ['Sunday',  6.5,  19.5, 22]
+            ]);
+
+            var options = {
+                title: 'AC Usage Over the Last Week',
+                hAxis: {title: 'Day'},
+                vAxis: {title: 'Hours On / Kwh Used / Avg. Temperature (°C)'},
+                seriesType: 'bars',
+                series: {2: {type: 'bars'}} 
+            };
+
+            var chart = new google.visualization.ComboChart(document.getElementById('ac_chart'));
+            chart.draw(data, options);
+        }
     </script>
-
-
 </body>
-
-
-
 </html>

@@ -39,7 +39,8 @@
         "unordered_map": "cpp",
         "vector": "cpp",
         "string_view": "cpp",
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "system_error": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

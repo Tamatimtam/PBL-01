@@ -26,7 +26,7 @@
 
 
 
-<div class="main" style="height: 600px;">  
+<div class="main" style="height: 650px;">  
     <a href="#" class="back-button" id="backButton">&larr; Back</a>
 
     <input type="checkbox" id="chk" aria-hidden="true">
@@ -38,10 +38,33 @@
     <div class="toggle-box">
         <div class="toggle-control">
             <label class="switch">
-                <input type="checkbox" id="ac-toggle">
+                <input type="checkbox" id="ac-toggle1" data-ac-id="1">
                 <span style="width: 60px;" class="slider round"></span>
             </label>
-            <span id="ac-status">Requesting AC Status...  </span>
+            <span style="width: 90px;">ESP A <br></span>
+            <span id="ac-status1" data-ac-id="1">Requesting AC Status...  </span>
+        </div>
+    </div>
+
+    <div class="toggle-box">
+        <div class="toggle-control">
+            <label class="switch">
+                <input type="checkbox" id="ac-toggle2" data-ac-id="2">
+                <span style="width: 60px;" class="slider round"></span>
+            </label>
+            <span style="width: 90px;">ESP B <br></span>
+            <span id="ac-status2" data-ac-id="2">Requesting AC Status...  </span>
+        </div>
+    </div>
+
+    <div class="toggle-box">
+        <div class="toggle-control">
+            <label class="switch">
+                <input type="checkbox" id="ac-toggle3" data-ac-id="3">
+                <span style="width: 60px;" class="slider round"></span>
+            </label>
+            <span style="width: 150px;">ESP A + B<br></span>
+            <span id="ac-status3" data-ac-id="3">Requesting AC Status...  </span>
         </div>
     </div>
     
@@ -87,6 +110,7 @@
         align-items: center;
         justify-content: center;
         margin-top: 20px;
+        height: 40px;
     }
 
     .ac-control label {
@@ -98,6 +122,7 @@
     .toggle-control #ac-status {
         color: black;
         margin: 0 10px; /* Adjust margin to bring text closer to the toggle */
+        /* heigh */
     }
 
     .toggle-control #ac-status.on {
@@ -112,6 +137,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        height: 80px;
     }
 </style>
 
@@ -130,43 +156,28 @@
     const decreaseTempButton = document.getElementById("decrease-temp");
     const increaseTempButton = document.getElementById("increase-temp");
     const chk = document.getElementById("chk");
-    const acToggle = document.getElementById("ac-toggle");
-    const acStatus = document.getElementById("ac-status");
+    const acToggles = document.querySelectorAll('[id^=ac-toggle]');
+    const acToggle1 = document.getElementById("ac-toggle1");
+    const acToggle2 = document.getElementById("ac-toggle2");
+    const acToggle3 = document.getElementById("ac-toggle3");
+
+    const acStatuses = document.querySelectorAll('[id^=ac-status]');
+    const acStatus1 = document.getElementById("ac-status1");
+    const acStatus2 = document.getElementById("ac-status2");
+    const acStatus3 = document.getElementById("ac-status3");
+
 
     let temperature = 25;
     let acButtonEnabled = true; // Flag to track if the AC toggle button is enabled
     let buttonCooldown = false; // Flag to track if the temperature buttons are in cooldown
 
-
-    socket.on('update_AC_status', function(data) {
-        const ACStatusElement = document.getElementById('ac-status');
-    const lightToggle = document.getElementById('ac-toggle');
-    
-    if (data.status) {
-        ACStatusElement.textContent = data.status;  
-        lightToggle.checked = data.status === 'AC On!'; // Set the checkbox status
-        updateAC();
-
-        setTimeout(function() {
-        updateAC();
-        }, 2000);
-
-        console.error(data.status)
-        
-    } else {
-        console.error('Invalid data received:', data);
-    }
-});
-
-
-    socket.on('update_AC_temp', function(data) {
-        updateTemperature()
-    });
-
-    socket.on('update_temperature', function(data) {
-            document.getElementById('DHT').innerText = 'Suhu ruang: ' + data.temperature + ' °C';
+    socket.on('update_AC', function() {
+            // Get the element with the ID 'ac_toggle'
+            var acToggle = document.getElementById('ac_toggle');
+            
+            // Toggle the checked property of the element
+            acToggle.checked = !acToggle.checked;
         });
-
 
 
     //Update AC Status Function
@@ -176,9 +187,9 @@
             .then(data => { //takes int the response and processes it to the next few lines
                 const ACStatusElement = document.getElementById('ac-status');
                 const lightToggle = document.getElementById('ac-toggle');
-                ACStatusElement.textContent = data;
-                lightToggle.checked = data === 'AC On!'; // Set the checkbox status
-                socket.emit('update_AC_status', { status: data }); //
+                 ACStatusElement.textContent = data;
+                lightToggle.checked = data === 'On'; // Set the checkbox status
+                socket.emit('update_AC', { status: data }); //
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -240,46 +251,81 @@ increaseTempButton.addEventListener("click", () => {
     function enableACButton() {
         acButtonEnabled = true;
         acToggle.disabled = false; // Re-enable the AC toggle button
-    }   
-    // Event listener for toggling AC on and off
+    }  
+    
+    
+
+// Function to update individual AC status
+function updateACStatus(id, status) {
+    const acStatusElement = document.getElementById(`ac-status${id}`);
+    const acToggleButton = document.getElementById(`ac-toggle${id}`);
+    if (acStatusElement) {
+        acStatusElement.textContent = status ? "On" : "Off";
+        console.log(`AC ${id} is turned ${status ? "on" : "off"}`);
+        acToggleButton.checked = status
+    }
+}
+
+acToggles.forEach(acToggle => {
     acToggle.addEventListener("change", () => {
+        socket.emit('update_AC', { status: 'Test' }); 
         if (acButtonEnabled) {
-            // AC button is enabled, proceed with the action
-            acButtonEnabled = false; // Disable the button
-            acToggle.disabled = true; // Disable the AC toggle button during cooldown
-            setTimeout(enableACButton, 5000); // Enable the button after 5 seconds
+            const acId = acToggle.getAttribute('data-ac-id'); // Get the AC ID from the data attribute
 
-            fetch('/ToggleAC')
-                .then(response => response.text())
-                .then(data => {
-                    if (acToggle.checked) {
-                        // AC is turned on
-                        acStatus.textContent = "AC On!";
-                        console.log("AC is turned on");
-                        acToggle.checked = true;
-                    } else {
-                        // AC is turned off
-                        acStatus.textContent = "AC OFF";
-                        console.log("AC is turned off");
-                        acToggle.checked = false;
+          // Function to fetch and update the AC status
+        const fetchAndToggleAC = (id, checked) => {
+            if (id == 3) {
+                // Directly update the AC status without making the fetch call
+                updateACStatus(id, checked);
+            } else {
+                // Make the fetch call and then update the AC status
+                return fetch(`/ToggleAC?acId=${id}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        updateACStatus(id, checked);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        };
+
+
+            if (acId === '3') {
+                // Toggle all AC units
+                const promises = [];
+                acToggles.forEach(toggle => {
+                    const id = toggle.getAttribute('data-ac-id');
+                    if (id !== '4') {
+                        toggle.checked = acToggle.checked;
+                        promises.push(fetchAndToggleAC(id, acToggle.checked));
                     }
-
-                    setTimeout(function() {
-                    updateAC(); 
-                    }, 2000);
-
-                
-                })
-                .catch(error => {
-                    console.error('Error:', error);
                 });
+                Promise.all(promises).then(() => {
+                    acToggle.disabled = false; // Re-enable the button
+                });
+            } else {
+                // Toggle individual AC unit
+                fetchAndToggleAC(acId, acToggle.checked).then(() => {
+                    acToggle.disabled = false; // Re-enable the button
+                });
+            }
+
+            setTimeout(function() {
+                // Optionally update other logic after AC toggle
+            }, 2000);
         } else {
             // Display alert notification about the cooldown
             alert("Please wait 5 seconds between AC toggle actions.");
         }
-
-        updateAC()
     });
+});
+
+
+// Initial update of AC statuses
+updateACStatus(1, true); // Initial status assumed as 'Off'
+updateACStatus(2, true); // Initial status assumed as 'Off'
+updateACStatus(3, true); // Initial status assumed as 'Off'
 
 
 

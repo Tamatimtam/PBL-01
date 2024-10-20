@@ -9,12 +9,16 @@ from flask_socketio import SocketIO, emit
 from ac_module import AC        # Import the AC class
 from lamp_module import Lamp    # Import the Lamp class
 
+import paho.mqtt.client as mqtt
+import threading
 import requests                 #http request
 import bcrypt                   #password security
 import os                       
 from requests.exceptions import ConnectionError
 from models import User, db, Logs   #user and logs database
 from flask_cors import CORS         #for socketio ig
+
+from datetime import datetime, timedelta
 # endregion
 
 
@@ -33,45 +37,67 @@ db.init_app(app)
 # region    SocketIO
 socketio = SocketIO(app) #initiate socketIO object
 
-  #Function for LED updated
-  #DEBUGGING, add a log statement when led emit event happens
-@socketio.on('update_led_status')
-def handle_update_led_status(data):
-    status = data['status']
-    # Use status information to update the HTML dynamically on the client side
-    print(f'LED status updated: {status}')
 
 
 
-      #DEBUGGING, add a log statement when ac emit event happens
-@socketio.on('update_AC_status')
-def handle_update_AC_status(data):
-    status = data['status']
-    # Use status information to update the HTML dynamically on the client side
-    print(f'AC status updated: {status}')
+# MQTT setup
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+    client.subscribe("your/AC/1")
+    client.subscribe("your/AC/2")
+    client.subscribe("your/AC/3")
 
-@socketio.on('update_AC_temp')  
-def handle_update_AC_temp(data):
-    status = data['status']
-    # Use status information to update the HTML dynamically on the client side
-    print(f'AC temp action: {status}')
+def on_message(client, userdata, msg):
+    if (msg.topic == "your/AC/1"):
+        print(f"1 Message received: {msg.payload.decode()}")
+        update_AC(msg.payload.decode())
+    
+    elif (msg.topic == "your/AC/2"):
+        print(f"2 Message received: {msg.payload.decode()}")
+        update_AC(msg.payload.decode())
+
+    else:
+        print ("wtf bro")
+    
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+
+mqtt_client.connect("broker.emqx.io", 1883, 60)
+
+def mqtt_thread():
+    mqtt_client.loop_forever()
 
 
-    # Receive temperature data from WebSocket
-@socketio.on('temperature_update')
-def handle_temperature_update(data):
-    temperature = data['temperature']
-    print(f'Temperature received: {temperature}')
-    emit('update_temperature', {'temperature': temperature})
+
+
+
 
 # endregion
+acState = False
+@socketio.on('connect')
+def handle_connect():
+    print("Successfull connect to SOCKET-IO")
+
+@socketio.on('update_AC')
+def recieve_AC(data):
+    global acState
+    print(f"Recieved updated ac data to {data}")
+    emit('update_AC')
 
 
+def update_AC(command):
+    print("MQTT Message recieved!")
+    print(command)
+    global acState
+    acState=command
+    socketio.emit('update_AC', acState)
 
 # region    Local Variables
 class_session_in_progress = False       # Variable buat locking 
-AC_url = "http://192.168.14.105"     # Variable buat arduino URL
-lamp_url = "http://192.168.14.53"     # Variable buat arduino URL
+AC_url = "http://192.168.47.72"     # Variable buat arduino URL
+lamp_url = "http://192.168.47.72"     # Variable buat arduino URL
 app.secret_key = os.urandom(24) 
 # endregion
 
@@ -142,12 +168,16 @@ def logout():
 
 
 
+
 # region INDEX, MENU AND RENDER MENU
 # Define a route for the home page
 @app.route('/')
 def index():
     return render_template('loggedOut.html')
 
+@app.route('/graph')
+def graph():
+    return render_template('graph.html')
 
 
 
@@ -189,7 +219,7 @@ def lamp():
 # Define a route for the AC page
 @app.route('/ac')
 def ac(): 
-    if 'logged_in' in session:
+    if True:
         if class_session_in_progress and session['role'] == 'user':
             error = "Access to the AC is locked during class session."
             return render_template('loggedIn.html', error=error)
@@ -262,7 +292,8 @@ def get_led_status():
 # Define route for turning on the LED
 @app.route('/turn_on_led', methods=['POST', 'GET'])
 def turn_on_led():
-    action = lamp_handler.turn_on_led(session, class_session_in_progress, db, socketio)
+    ac_id = request.args.get('acId')
+    action = lamp_handler.turn_on_led(session, class_session_in_progress, db, socketio, ac_id)
     return action
 # endregion
 
@@ -289,7 +320,8 @@ def update_temp():
 # Define route for toggling AC
 @app.route('/ToggleAC', methods=['POST', 'GET'])
 def toggle_ac():
-    action = ac_handler.toggle_ac(session, class_session_in_progress, db, socketio)
+    ac_id = request.args.get('acId')
+    action = ac_handler.toggle_ac(session, class_session_in_progress, db, socketio, ac_id)
     return action
 
 # Define route for adjusting AC temperature up
@@ -310,6 +342,9 @@ def ac_down():
 
 # Run the Flask application
 if __name__ == '__main__':
+    print("Test")
+    threading.Thread(target=mqtt_thread,).start()
     with app.app_context():
         db.create_all()
-    socketio.run(app, debug=True, ssl_context=('ssl-certificate/laragon.crt', 'ssl-certificate/laragon.key'))
+    socketio.run(app, debug=False, ssl_context=('ssl-certificate/laragon.crt', 'ssl-certificate/laragon.key'))
+    print("WALAWEEEEEE")
