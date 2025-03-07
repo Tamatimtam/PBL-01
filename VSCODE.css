@@ -1,8 +1,0 @@
-/* This CSS rule targets comments starting with H1 */
-.token.comment {
-    font-size: 12px; /* Default comment size */
-}
-.token.comment.h1-comment {
-    font-size: 20px; /* Larger size for H1 comments */
-    font-weight: bold;
-}
